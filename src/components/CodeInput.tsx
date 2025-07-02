@@ -52,9 +52,9 @@ export default function CodeInput({ onSubmit }: CodeInputProps) {
                 overflow: 'auto',
                 resize: 'vertical',
               }}
-              placeholder="// Paste your code here...
-// Supports any programming language
-// Large code snippets are welcome!"
+              placeholder="Paste your code here...
+Supports any programming language
+Large code snippets are welcome!"
             />
           </div>
           

@@ -1,31 +1,35 @@
-# Snippix Devlog
+# Snippix Development Log
 
-Snippix is a simple and awesome code art generator. It transforms any code snippet into beautiful, retro pixel art patterns. Built with Next.js, React, and TypeScript, Snippix focuses on clean code, intuitive UX, and delightful, customizable art generation.
-
----
-
-## Version 1.0
-  - Complete art generation pipeline from code to downloadable pixel art
-  - Beautiful, unique patterns generated from any code snippet
-  - Interactive customization with color palettes and pixel sizes
+Code art generator that transforms source code into pixel art patterns with optional steganographic embedding. Built with Next.js, React, and TypeScript.
 
 ---
 
-## Version 2.0 Development Plan
+## Version 1.0 - Core Art Generation
+- Code to pixel art transformation with deterministic patterns
+- Multiple color palettes and configurable pixel sizes
+- Canvas-based rendering with downloadable PNG output
+- Responsive UI with real-time preview
 
-### Reversible Art Cards (Planned)
-- **Code Embedding**: Steganography implementation for hiding code in art
-- **Encryption**: Optional encryption with user keys for secure sharing
-- **Art Decoding**: Extract and decrypt code from shared art images
+## Version 2.0 - Reversible Art Cards
+- LSB steganography for embedding code in pixel data
+- Optional XOR encryption with user-provided keys
+- Decode modal for extracting embedded code from images
+- Browser-compatible implementation without external dependencies
+
+## Current Features
+- Art generation from any text input
+- Color palette selection (retro, neon, sunset, monochrome, etc.)
+- Pixel size customization (4px to 16px)
+- Code embedding with optional password protection
+- Image decoding with visual feedback
+- Copy to clipboard and text file download
+
+## Technical Implementation
+- Deterministic art generation based on code content analysis
+- Least Significant Bit encoding for data embedding
+- Canvas-to-blob conversion for reliable image downloads
+- Client-side processing without server dependencies
 
 ---
 
-## Next Steps
-- Complete steganography implementation for reversible art cards
-- Add live preview as user types
-- Implement "Inspire Me" random code button
-- Build mini gallery/history of generated art
-
----
-
-Made with ❤️ for Hack Club Summer of Code, 2025.
+Built for Hack Club Summer of Code 2025.

@@ -14,14 +14,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://snippix.vercel.app"),
+  metadataBase: new URL("https://snippixbymnn.vercel.app"),
   title: "Snippix: Code Art Generator",
   description: "Transform your code snippets into beautiful, retro pixel art patterns. Secure, customizable, and shareable art cards for developers.",
   keywords: [
     "code art",
     "pixel art", 
     "code to art",
-    "steganography",
+    "metadata embedding",
     "secure code sharing",
     "Next.js",
     "React",
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Snippix: Code Art Generator",
     description: "Transform your code snippets into beautiful, retro pixel art patterns. Secure, customizable, and shareable art cards for developers.",
-    url: "https://snippix.vercel.app/",
+    url: "https://snippixbymnn.vercel.app/",
     siteName: "Snippix",
     images: [
       {

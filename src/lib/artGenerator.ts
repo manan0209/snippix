@@ -1,3 +1,5 @@
+import { embedCodeInPixels, type EmbedOptions } from './steganography';
+
 export interface CodeFeatures {
   length: number;
   indent: number;
@@ -40,7 +42,6 @@ export function generatePixelArt(
 ): void {
   const { width, height, pixelSize, colors } = config;
   
-  // Clear canvas with background color
   ctx.fillStyle = colors[4] || '#18181b';
   ctx.fillRect(0, 0, width, height);
 
@@ -49,66 +50,54 @@ export function generatePixelArt(
   const cols = Math.floor(width / pixelSize);
   const rows = Math.floor(height / pixelSize);
 
-  // Create more sophisticated patterns based on code structure
   const codeBytes = new TextEncoder().encode(code);
   
-  // Pattern generation with multiple layers
   for (let layer = 0; layer < 3; layer++) {
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
         const idx = (y * cols + x) % codeBytes.length;
         const byte = codeBytes[idx] || 0;
         
-        // Create layered patterns
         const layerSeed = hash + layer * 1000;
         const pattern = (byte + x * 7 + y * 13 + layerSeed) % 256;
         
-        // Different density for each layer
         const densities = [0.3, 0.15, 0.08];
         const threshold = densities[layer] * 256;
         
         if (pattern > threshold) {
-          // Color selection based on code features and position
           let colorIdx;
           switch (layer) {
-            case 0: // Base layer - most frequent
+            case 0:
               colorIdx = (byte + x + y) % (colors.length - 1);
               break;
-            case 1: // Mid layer - symbols and special chars
+            case 1:
               colorIdx = features.symbols > 0 ? 
                 ((byte * features.symbols + x) % (colors.length - 1)) : 0;
               break;
-            case 2: // Top layer - accents
-              colorIdx = 0; // Primary accent color
+            case 2:
+              colorIdx = 0;
               break;
             default:
               colorIdx = 0;
           }
           
-          // Add some randomness based on code content
           if ((byte + hash + x * y) % 100 < 15) {
             colorIdx = (colorIdx + 1) % (colors.length - 1);
           }
           
           ctx.fillStyle = colors[colorIdx];
           
-          // Vary pixel sizes for visual interest
-          const pixelVariation = layer === 2 ? pixelSize * 0.6 : pixelSize;
-          const offsetX = layer === 2 ? pixelSize * 0.2 : 0;
-          const offsetY = layer === 2 ? pixelSize * 0.2 : 0;
-          
           ctx.fillRect(
-            x * pixelSize + offsetX, 
-            y * pixelSize + offsetY, 
-            pixelVariation, 
-            pixelVariation
+            x * pixelSize, 
+            y * pixelSize, 
+            pixelSize, 
+            pixelSize
           );
         }
       }
     }
   }
 
-  // Add structural elements based on code
   addStructuralElements(ctx, code, features, config, hash);
 }
 
@@ -121,11 +110,9 @@ function addStructuralElements(
 ): void {
   const { width, height, colors } = config;
   
-  // Draw lines based on code structure
   ctx.strokeStyle = colors[0];
   ctx.lineWidth = 2;
   
-  // Vertical lines for indentation patterns
   if (features.indent > 0) {
     const indentLines = Math.min(5, Math.floor(features.indent));
     for (let i = 0; i < indentLines; i++) {
@@ -139,7 +126,6 @@ function addStructuralElements(
     }
   }
   
-  // Horizontal lines for code blocks
   const blockLines = Math.min(4, Math.floor(features.lines / 10));
   for (let i = 0; i < blockLines; i++) {
     const y = ((hash + i * 23) % (height * 0.6)) + height * 0.2;
@@ -151,7 +137,6 @@ function addStructuralElements(
     ctx.globalAlpha = 1;
   }
   
-  // Add geometric shapes for functions/classes
   if (features.symbols > 20) {
     ctx.fillStyle = colors[1];
     ctx.globalAlpha = 0.4;
@@ -165,6 +150,34 @@ function addStructuralElements(
       ctx.fillRect(x - size/2, y - size/2, size, size);
     }
     ctx.globalAlpha = 1;
+  }
+}
+
+// v2.0 Feature: Generate art with embedded code
+export async function generateArtWithCode(
+  canvas: HTMLCanvasElement,
+  code: string,
+  config: ArtConfig,
+  embedOptions?: EmbedOptions
+): Promise<void> {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    throw new Error('Could not get canvas context');
+  }
+
+  generatePixelArt(ctx, code, config);
+
+  if (embedOptions) {
+    try {
+      const success = embedCodeInPixels(canvas, code, embedOptions);
+      
+      if (!success) {
+        throw new Error('Failed to embed code');
+      }
+    } catch (error) {
+      console.error('Embedding failed:', error);
+      throw error;
+    }
   }
 }
 

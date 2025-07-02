@@ -1,13 +1,15 @@
-import { generatePixelArt, type ArtConfig } from '@/lib/artGenerator';
+import { generateArtWithCode, type ArtConfig } from '@/lib/artGenerator';
+import { type EmbedOptions } from '@/lib/steganography';
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 
 interface ArtCanvasProps {
   code: string;
   config: ArtConfig;
+  embedOptions?: EmbedOptions;
 }
 
 const ArtCanvas = forwardRef<HTMLCanvasElement, ArtCanvasProps>(
-  ({ code, config }, ref) => {
+  ({ code, config, embedOptions }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useImperativeHandle(ref, () => canvasRef.current!);
@@ -15,12 +17,9 @@ const ArtCanvas = forwardRef<HTMLCanvasElement, ArtCanvasProps>(
     useEffect(() => {
       const canvas = canvasRef.current;
       if (!canvas) return;
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
 
-      generatePixelArt(ctx, code, config);
-    }, [code, config]);
+      generateArtWithCode(canvas, code, config, embedOptions);
+    }, [code, config.pixelSize, config.colors, embedOptions?.useEncryption, embedOptions?.encryptionKey]);
 
     return (
       <canvas

@@ -1,45 +1,66 @@
-# Snippix v1.0: Simple & Awesome Code Art Generator
+# Snippix
 
-Snippix is a simple and awesome code art generator built with Next.js, React, and TypeScript. Transform any code snippet into beautiful, retro pixel art patterns. Each piece is unique and generated from your code's structure and content.
+Code art generator that transforms source code into pixel art patterns with steganographic embedding capabilities. Built with Next.js, React, and TypeScript.
 
-## Features (v1.0)
-- Submit code snippets in any programming language
-- Generate unique, beautiful pixel art from code structure
-- Interactive art customization (color palettes, pixel sizes)
-- Download generated art as PNG images
-- Retro minimalistic coding aesthetic
-- Modular, scalable architecture
+## Features
 
-## Coming in v2.0
+- Generate deterministic pixel art from any text input
+- Multiple color palettes and configurable pixel sizes
+- LSB steganography for embedding code within pixel data
+- Optional XOR encryption with user-provided keys
+- Browser-compatible PNG downloads with embedded data preservation
+- Client-side processing without external dependencies
+- Decode embedded code from generated images
 
-- **Reversible Art Cards**: Embed code snippets within pixel art using steganography
-- **Code Encryption**: Optional encryption with user-provided keys for privacy
-- **Art Decoding**: Extract and decrypt code from shared art images
-- **Secure Sharing**: Share art that contains hidden code snippets
+## Usage
 
-## Architecture
+### Basic Art Generation
+1. Input source code or text in any format
+2. Select color palette and pixel size
+3. Generate and download pixel art as PNG
 
-This project follows a clean, modular architecture:
+### Code Embedding
+1. Enable embedding option in the interface
+2. Optionally set encryption password for security
+3. Generate art with code embedded in pixel LSB data
+4. Share downloaded PNG files - embedded data survives compression
+
+### Code Extraction
+1. Upload Snippix-generated image using decode modal
+2. Enter decryption password if image was encrypted
+3. Extract embedded code with copy and download options
+
+## Technical Implementation
+
+### Core Components
+- **Art Generation**: Deterministic algorithms based on code structure analysis
+- **Steganography**: Least Significant Bit encoding in RGB channels
+- **Encryption**: XOR cipher with user-provided keys
+- **File Handling**: Canvas-to-blob conversion for reliable downloads
+
+### Architecture
 
 ```
 /src
-  /lib          # Core business logic (pure functions)
-    - palettes.ts       # Color palette definitions
-    - artGenerator.ts   # Pixel art generation algorithms  
-    - steganography.ts  # Code embedding/extraction (future)
-  /components   # Reusable UI components
-    - CodeInput.tsx
-    - ArtCanvas.tsx
-    - PaletteSelector.tsx
-    - PixelSizeSelector.tsx
-    - DownloadButton.tsx
-    - DecodeArtModal.tsx
-  /app          # Next.js app router
-    - layout.tsx
-    - page.tsx
-    - globals.css
+  /lib
+    - artGenerator.ts        # Pixel art generation algorithms  
+    - steganography.ts       # LSB encoding/decoding
+    - palettes.ts           # Color scheme definitions
+  /components
+    - CodeInput.tsx         # Text input interface
+    - ArtCanvas.tsx         # Canvas rendering component
+    - DecodeArtModal.tsx    # Extraction interface
+    - DownloadButton.tsx    # File download handling
+  /app
+    - page.tsx             # Main application
+    - layout.tsx           # Application layout
 ```
 
----
+## Development
 
-Made with ❤️ for Hack Club Summer of Code.
+```bash
+npm install
+npm run dev
+```
+
+Built for Hack Club Summer of Code 2025.
