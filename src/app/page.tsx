@@ -114,13 +114,13 @@ export default function Home() {
               <div className="mt-6 max-w-md mx-auto">
                 <div className="bg-[#18181b]/80 backdrop-blur-sm border border-[#8b5cf6]/30 rounded-lg p-4">
                   <label className="block text-[#8b5cf6] text-sm font-mono mb-2 font-medium">
-                    🗝️ Encryption Password
+                    🗝️ Encryption key
                   </label>
                   <input
                     type="password"
                     value={encryptionKey}
                     onChange={(e) => setEncryptionKey(e.target.value)}
-                    placeholder="Enter secure password..."
+                    placeholder="Enter a key to encrypt data..."
                     className="w-full bg-[#0a0a0a] border border-[#8b5cf6]/30 rounded-lg px-4 py-3 text-[#8b5cf6] text-sm focus:border-[#8b5cf6] focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]/20 font-mono transition-all"
                   />
                   <div className="flex gap-2 mt-3">
@@ -144,7 +144,7 @@ export default function Home() {
                     </button>
                   </div>
                   <p className="text-xs text-[#8b5cf6]/70 mt-2 font-mono">
-                    💡 Remember this password - you&apos;ll need it to decode your art later
+                    💡 Remember and share this key with the receiver - you&apos;ll need it to decode your art later
                   </p>
                 </div>
               </div>
