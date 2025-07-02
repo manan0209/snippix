@@ -1,15 +1,12 @@
 import { downloadCanvas } from '@/lib/artGenerator';
-import { type EmbedOptions } from '@/lib/steganography';
 import React, { useState } from 'react';
 
 interface DownloadButtonProps {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   filename?: string;
-  code?: string;
-  embedOptions?: EmbedOptions;
 }
 
-export default function DownloadButton({ canvasRef, filename, code, embedOptions }: DownloadButtonProps) {
+export default function DownloadButton({ canvasRef, filename }: DownloadButtonProps) {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const handleDownload = async () => {

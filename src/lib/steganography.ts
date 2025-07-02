@@ -237,7 +237,7 @@ export function extractCodeFromPixels(
 
         try {
           extractedCode = xorDecrypt(extractedCode, decryptionKey);
-        } catch (error) {
+        } catch {
           return {
             success: false,
             error: "Failed to decrypt. Check your key.",
@@ -251,7 +251,7 @@ export function extractCodeFromPixels(
         code: extractedCode,
         method: "LSB",
       };
-    } catch (error) {
+    } catch {
       return { success: false, error: "Invalid payload format", method: "LSB" };
     }
   } catch (error) {

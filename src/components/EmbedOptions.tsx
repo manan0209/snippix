@@ -1,5 +1,5 @@
 import { type EmbedOptions } from '@/lib/steganography';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 interface EmbedOptionsProps {
   onOptionsChange: (options: EmbedOptions | undefined) => void;
@@ -10,7 +10,7 @@ export default function EmbedOptions({ onOptionsChange }: EmbedOptionsProps) {
   const [useEncryption, setUseEncryption] = useState(false);
   const [encryptionKey, setEncryptionKey] = useState('');
 
-  const handleChange = () => {
+  const handleChange = useCallback(() => {
     if (!enableEmbedding) {
       onOptionsChange(undefined);
       return;
@@ -22,11 +22,11 @@ export default function EmbedOptions({ onOptionsChange }: EmbedOptionsProps) {
     };
 
     onOptionsChange(options);
-  };
+  }, [enableEmbedding, useEncryption, encryptionKey, onOptionsChange]);
 
   React.useEffect(() => {
     handleChange();
-  }, [enableEmbedding, useEncryption, encryptionKey]);
+  }, [enableEmbedding, useEncryption, encryptionKey, handleChange]);
 
   return (
     <div className="bg-[#1a1a1a] border border-[#b5e853]/20 rounded-lg p-6">

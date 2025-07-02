@@ -19,7 +19,7 @@ const ArtCanvas = forwardRef<HTMLCanvasElement, ArtCanvasProps>(
       if (!canvas) return;
 
       generateArtWithCode(canvas, code, config, embedOptions);
-    }, [code, config.pixelSize, config.colors, embedOptions?.useEncryption, embedOptions?.encryptionKey]);
+    }, [code, config, embedOptions]);
 
     return (
       <canvas
