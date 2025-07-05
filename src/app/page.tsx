@@ -5,17 +5,17 @@ import CodeInput from "@/components/CodeInput";
 import DecodeArtModal from "@/components/DecodeArtModal";
 import DownloadButton from "@/components/DownloadButton";
 import { type ArtConfig } from "@/lib/artGenerator";
-import { type Palette } from "@/lib/palettes";
+import { DEFAULT_PALETTE, type Palette, PALETTES } from "@/lib/palettes";
 import { useRef, useState } from "react";
 
 const CANVAS_WIDTH = 600;
 const CANVAS_HEIGHT = 400;
+const OPTIMAL_PIXEL_SIZE = 12; // Optimal size for art generation (doesn't affect embedding)
 
 export default function Home() {
   const [submitted, setSubmitted] = useState<{
     code: string;
     palette: Palette;
-    pixelSize: number;
   } | null>(null);
   const [isDecodeModalOpen, setIsDecodeModalOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -23,12 +23,26 @@ export default function Home() {
   const [useEncryption, setUseEncryption] = useState(false);
   const [encryptionKey, setEncryptionKey] = useState('');
   const [showKeyInput, setShowKeyInput] = useState(false);
+  const [selectedPalette, setSelectedPalette] = useState<Palette>(DEFAULT_PALETTE);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const handleCodeSubmit = async (code: string, palette: Palette, pixelSize: number) => {
+  const handleCodeSubmit = async (code: string) => {
     setIsGenerating(true);
-    setSubmitted({ code, palette, pixelSize });
+    setSubmitted({ code, palette: selectedPalette });
     setTimeout(() => setIsGenerating(false), 100);
+  };
+
+  // Update art when palette changes if code is already submitted
+  const handlePaletteChange = () => {
+    const currentIndex = PALETTES.findIndex(p => p.name === selectedPalette.name);
+    const nextIndex = (currentIndex + 1) % PALETTES.length;
+    const newPalette = PALETTES[nextIndex];
+    setSelectedPalette(newPalette);
+    
+    // If we have submitted code, update the art with the new palette
+    if (submitted) {
+      setSubmitted({ ...submitted, palette: newPalette });
+    }
   };
 
   const handleCodeDecoded = (code: string) => {
@@ -38,7 +52,7 @@ export default function Home() {
   const artConfig: ArtConfig | null = submitted ? {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
-    pixelSize: submitted.pixelSize,
+    pixelSize: OPTIMAL_PIXEL_SIZE,
     colors: submitted.palette.colors,
   } : null;
 
@@ -87,9 +101,27 @@ export default function Home() {
             </p>
             
             <div className="flex flex-wrap justify-center gap-4 mt-8">
-              <span className="px-4 py-2 bg-[#b5e853]/10 border border-[#b5e853]/30 rounded-full text-[#b5e853] text-sm font-mono">
-                Any Language
-              </span>
+              <button
+                onClick={handlePaletteChange}
+                className="px-4 py-2 bg-[#b5e853]/10 border border-[#b5e853]/30 rounded-full text-[#b5e853] text-sm font-mono hover:bg-[#b5e853]/20 transition-all group relative"
+                title={`Click to change palette (${PALETTES.length} available)`}
+              >
+                <span className="flex items-center gap-2">
+                  <div className="flex gap-1">
+                    {selectedPalette.colors.slice(0, 3).map((color, i) => (
+                      <div 
+                        key={i}
+                        className="w-2 h-2 rounded-full" 
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
+                  {selectedPalette.name}
+                  <svg className="w-3 h-3 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </span>
+              </button>
               <span className="px-4 py-2 bg-[#b5e853]/10 border border-[#b5e853]/30 rounded-full text-[#b5e853] text-sm font-mono">
                 Code Art
               </span>
@@ -177,7 +209,7 @@ export default function Home() {
         <main className="flex-1 flex flex-col items-center px-4 pb-12">
           <div className="w-full max-w-6xl space-y-12">
             <section>
-              <CodeInput onSubmit={handleCodeSubmit} />
+              <CodeInput onSubmit={handleCodeSubmit} submitted={!!submitted} />
             </section>
 
             {submitted && artConfig && (
@@ -189,11 +221,18 @@ export default function Home() {
                   
                   <div className="flex flex-col items-center space-y-6">
                     {isGenerating && (
-                      <div className="flex items-center gap-3 text-[#8b5cf6] font-mono">
-                        <div className="animate-spin w-5 h-5 border-2 border-[#8b5cf6] border-t-transparent rounded-full"></div>
-                        <span>
-                          {enableEmbedding ? 'Generating art with embedded code...' : 'Generating art...'}
-                        </span>
+                      <div className="flex flex-col items-center gap-3 text-[#8b5cf6] font-mono">
+                        <div className="flex items-center gap-3">
+                          <div className="animate-spin w-5 h-5 border-2 border-[#8b5cf6] border-t-transparent rounded-full"></div>
+                          <span>
+                            {enableEmbedding ? 'Generating art with embedded code...' : 'Generating art...'}
+                          </span>
+                        </div>
+                        {enableEmbedding && submitted && submitted.code.length > 50000 && (
+                          <div className="text-sm text-[#8b5cf6]/70">
+                            Large content detected - this may take a moment...
+                          </div>
+                        )}
                       </div>
                     )}
                     
@@ -212,7 +251,13 @@ export default function Home() {
                         <div className="text-[#b5e853] text-xs font-mono space-y-1">
                           <div>{submitted.code.length} chars</div>
                           <div>{submitted.code.split('\n').length} lines</div>
-                          <div>{submitted.palette.name}</div>
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="w-2 h-2 rounded-full" 
+                              style={{ backgroundColor: submitted.palette.colors[0] }}
+                            />
+                            {submitted.palette.name}
+                          </div>
                         </div>
                       </div>
 

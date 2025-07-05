@@ -38,27 +38,33 @@ function xorDecrypt(encryptedText: string, key: string): string {
 }
 
 /**
- * Convert string to binary representation
+ * Convert string to binary representation with UTF-8 encoding
  */
 function stringToBinary(str: string): string {
-  return str
-    .split("")
-    .map((char) => char.charCodeAt(0).toString(2).padStart(8, "0"))
+  // Use TextEncoder for proper UTF-8 encoding
+  const encoder = new TextEncoder();
+  const bytes = encoder.encode(str);
+  
+  return Array.from(bytes)
+    .map(byte => byte.toString(2).padStart(8, "0"))
     .join("");
 }
 
 /**
- * Convert binary representation back to string
+ * Convert binary representation back to string with UTF-8 decoding
  */
 function binaryToString(binary: string): string {
-  const chars = [];
+  const bytes = [];
   for (let i = 0; i < binary.length; i += 8) {
-    const byte = binary.substr(i, 8);
+    const byte = binary.substring(i, i + 8);
     if (byte.length === 8) {
-      chars.push(String.fromCharCode(parseInt(byte, 2)));
+      bytes.push(parseInt(byte, 2));
     }
   }
-  return chars.join("");
+  
+  // Use TextDecoder for proper UTF-8 decoding
+  const decoder = new TextDecoder();
+  return decoder.decode(new Uint8Array(bytes));
 }
 
 /**
@@ -92,8 +98,20 @@ export function embedCodeInPixels(
     const payloadString = JSON.stringify(payload);
     const payloadBinary = stringToBinary(payloadString);
 
-    const lengthBinary = payloadString.length.toString(2).padStart(32, "0");
+    // Store the byte length (not character length) for UTF-8 compatibility
+    const payloadByteLength = payloadBinary.length / 8;
+    const lengthBinary = payloadByteLength.toString(2).padStart(32, "0");
     const fullBinary = lengthBinary + payloadBinary;
+
+    console.log('Embedding payload:', {
+      codeLength: dataToEmbed.length,
+      payloadStringLength: payloadString.length,
+      payloadByteLength: payloadByteLength,
+      payloadBinaryLength: payloadBinary.length,
+      lengthBinary: lengthBinary,
+      fullBinaryLength: fullBinary.length,
+      payloadStringPreview: payloadString.substring(0, 100)
+    });
 
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
@@ -151,7 +169,6 @@ export function extractCodeFromPixels(
     const data = imageData.data;
 
     let lengthBinary = "";
-    let bitIndex = 0;
 
     for (let i = 0; i < data.length && lengthBinary.length < 32; i += 4) {
       for (
@@ -165,18 +182,46 @@ export function extractCodeFromPixels(
       }
     }
 
-    const payloadLength = parseInt(lengthBinary, 2);
-    if (payloadLength <= 0 || payloadLength > 100000) {
+    const payloadByteLength = parseInt(lengthBinary, 2);
+    console.log('Extraction debug:', {
+      lengthBinary: lengthBinary,
+      payloadByteLength: payloadByteLength,
+      canvasSize: `${canvas.width}x${canvas.height}`,
+      imageDataLength: data.length
+    });
+    
+    // More generous bounds check for large content
+    if (payloadByteLength <= 0 || payloadByteLength > 200000) {
+      console.error('Payload length validation failed:', {
+        payloadByteLength,
+        lengthBinary,
+        isPositive: payloadByteLength > 0,
+        withinBounds: payloadByteLength <= 200000
+      });
       return {
         success: false,
-        error: "Invalid payload length found",
+        error: `Invalid payload length: ${payloadByteLength}. This image may not contain Snippix data or the data is corrupted.`,
         method: "LSB",
       };
     }
 
-    const payloadBits = payloadLength * 8;
+    // Check if we have enough pixels for this payload
+    const availableBits = (data.length / 4) * 3;
+    const requiredBits = 32 + (payloadByteLength * 8); // 32-bit length + payload bits
+    
+    if (requiredBits > availableBits) {
+      return {
+        success: false,
+        error: `Payload too large for image. Need ${requiredBits} bits, image has ${availableBits} bits available.`,
+        method: "LSB",
+      };
+    }
+
+    const payloadBits = payloadByteLength * 8;
     let payloadBinary = "";
-    bitIndex = 32;
+    
+    // Start extracting payload after the 32-bit length header
+    let totalBitsProcessed = 0;
 
     for (
       let i = 0;
@@ -188,18 +233,28 @@ export function extractCodeFromPixels(
         channel < 3 && payloadBinary.length < payloadBits;
         channel++
       ) {
-        if (bitIndex > 0) {
-          bitIndex--;
+        const pixelIndex = i + channel;
+        const bit = data[pixelIndex] & 1;
+        
+        // Skip the first 32 bits (length header)
+        if (totalBitsProcessed < 32) {
+          totalBitsProcessed++;
           continue;
         }
 
-        const pixelIndex = i + channel;
-        const bit = data[pixelIndex] & 1;
+        // Extract payload bits
         payloadBinary += bit.toString();
+        totalBitsProcessed++;
       }
     }
 
     if (payloadBinary.length < payloadBits) {
+      console.error('Incomplete payload extraction:', {
+        expectedBits: payloadBits,
+        extractedBits: payloadBinary.length,
+        totalBitsProcessed: totalBitsProcessed,
+        payloadByteLength: payloadByteLength
+      });
       return {
         success: false,
         error: "Incomplete payload data found",
@@ -207,11 +262,27 @@ export function extractCodeFromPixels(
       };
     }
 
+    console.log('Payload extraction successful:', {
+      payloadBits: payloadBits,
+      extractedBits: payloadBinary.length,
+      totalBitsProcessed: totalBitsProcessed,
+      payloadByteLength: payloadByteLength
+    });
+
     // Convert binary back to string
     const payloadString = binaryToString(payloadBinary);
+    console.log('Extracted payload string length:', payloadString.length);
+    console.log('Payload string preview (first 100):', payloadString.substring(0, 100));
+    console.log('Payload string preview (last 100):', payloadString.substring(Math.max(0, payloadString.length - 100)));
+    
+    // Check if the string looks like valid JSON
+    const startsWithBrace = payloadString.trim().startsWith('{');
+    const endsWithBrace = payloadString.trim().endsWith('}');
+    console.log('JSON validity check:', { startsWithBrace, endsWithBrace, trimmedLength: payloadString.trim().length });
 
     try {
       const payload = JSON.parse(payloadString);
+      console.log('Parsed payload:', { header: payload.header, version: payload.version, encrypted: payload.encrypted });
 
       // Verify it's a Snippix payload
       if (payload.header !== SNIPPIX_HEADER) {
@@ -251,8 +322,16 @@ export function extractCodeFromPixels(
         code: extractedCode,
         method: "LSB",
       };
-    } catch {
-      return { success: false, error: "Invalid payload format", method: "LSB" };
+    } catch (jsonError) {
+      console.error('JSON parsing failed:', jsonError);
+      console.error('Payload string length:', payloadString.length);
+      console.error('Payload string sample (first 200 chars):', payloadString.substring(0, 200));
+      console.error('Payload string sample (last 200 chars):', payloadString.substring(payloadString.length - 200));
+      return { 
+        success: false, 
+        error: `Invalid payload format: ${jsonError instanceof Error ? jsonError.message : 'JSON parse error'}`, 
+        method: "LSB" 
+      };
     }
   } catch (error) {
     console.error("Failed to extract code:", error);
