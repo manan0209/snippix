@@ -6,7 +6,7 @@ import DecodeArtModal from "@/components/DecodeArtModal";
 import DownloadButton from "@/components/DownloadButton";
 import { type ArtConfig } from "@/lib/artGenerator";
 import { DEFAULT_PALETTE, type Palette, PALETTES } from "@/lib/palettes";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const CANVAS_WIDTH = 600;
 const CANVAS_HEIGHT = 400;
@@ -24,7 +24,61 @@ export default function Home() {
   const [encryptionKey, setEncryptionKey] = useState('');
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [selectedPalette, setSelectedPalette] = useState<Palette>(DEFAULT_PALETTE);
+  const [heartCount, setHeartCount] = useState(0);
+  const [personalHearts, setPersonalHearts] = useState(0);
+  const [isHeartLoading, setIsHeartLoading] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Load global heart count and personal count on component mount
+  useEffect(() => {
+    // Load personal count from localStorage
+    const savedPersonalHearts = localStorage.getItem('snippix-personal-hearts');
+    if (savedPersonalHearts) {
+      setPersonalHearts(parseInt(savedPersonalHearts, 10) || 0);
+    }
+
+    // Load global count from API
+    fetchGlobalHearts();
+  }, []);
+
+  const fetchGlobalHearts = async () => {
+    try {
+      const response = await fetch('/api/hearts');
+      const data = await response.json();
+      setHeartCount(data.count || 0);
+    } catch (error) {
+      console.log('Could not fetch global hearts');
+      setHeartCount(42); // Fallback number
+    }
+  };
+
+  const handleHeartClick = async () => {
+    if (isHeartLoading) return;
+    
+    setIsHeartLoading(true);
+    
+    try {
+      // Increment global count via API
+      const response = await fetch('/api/hearts', { method: 'POST' });
+      const data = await response.json();
+      setHeartCount(data.count || heartCount + 1);
+      
+      // Increment personal count locally
+      const newPersonalCount = personalHearts + 1;
+      setPersonalHearts(newPersonalCount);
+      localStorage.setItem('snippix-personal-hearts', newPersonalCount.toString());
+      
+    } catch (error) {
+      console.log('Could not increment hearts');
+      // Fallback to local increment
+      setHeartCount(prev => prev + 1);
+      const newPersonalCount = personalHearts + 1;
+      setPersonalHearts(newPersonalCount);
+      localStorage.setItem('snippix-personal-hearts', newPersonalCount.toString());
+    } finally {
+      setIsHeartLoading(false);
+    }
+  };
 
   const handleCodeSubmit = async (code: string) => {
     setIsGenerating(true);
@@ -80,6 +134,33 @@ export default function Home() {
             </svg>
           </a>
         </div>
+        
+        {/* Global Heart Counter */}
+        <div className="fixed top-4 right-4 z-50">
+          <button
+            onClick={handleHeartClick}
+            disabled={isHeartLoading}
+            className="flex items-center gap-2 px-3 py-2 bg-[#18181b]/80 backdrop-blur-sm border border-red-400/30 rounded-lg text-red-400 text-xs font-mono hover:border-red-400/60 hover:bg-red-400/5 transition-all group disabled:opacity-50"
+            title={`Global community love: ${heartCount.toLocaleString()} hearts! You've given ${personalHearts} hearts.`}
+          >
+            <svg 
+              className={`w-4 h-4 fill-current group-hover:scale-110 transition-transform ${isHeartLoading ? 'animate-pulse' : ''}`}
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            <div className="flex flex-col items-start leading-tight">
+              <span className="group-hover:text-red-300 transition-colors font-bold">
+                {heartCount.toLocaleString()}
+              </span>
+              {personalHearts > 0 && (
+                <span className="text-[10px] text-red-400/70">
+                  You: {personalHearts}
+                </span>
+              )}
+            </div>
+          </button>
+        </div>
       <div className="fixed inset-0 pointer-events-none opacity-[0.03]">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYjVlODUzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')]"></div>
       </div>
@@ -103,7 +184,7 @@ export default function Home() {
             <div className="flex flex-wrap justify-center gap-4 mt-8">
               <button
                 onClick={handlePaletteChange}
-                className="px-4 py-2 bg-[#b5e853]/10 border border-[#b5e853]/30 rounded-full text-[#b5e853] text-sm font-mono hover:bg-[#b5e853]/20 transition-all group relative"
+                className="px-4 py-2 bg-[#8b5cf6]/10 border-2 border-[#8b5cf6]/40 rounded-full text-[#8b5cf6] text-sm font-mono hover:bg-[#8b5cf6]/20 hover:border-[#8b5cf6]/60 transition-all group relative shadow-lg hover:shadow-[#8b5cf6]/20"
                 title={`Click to change palette (${PALETTES.length} available)`}
               >
                 <span className="flex items-center gap-2">
@@ -111,7 +192,7 @@ export default function Home() {
                     {selectedPalette.colors.slice(0, 3).map((color, i) => (
                       <div 
                         key={i}
-                        className="w-2 h-2 rounded-full" 
+                        className="w-2 h-2 rounded-full border border-white/20" 
                         style={{ backgroundColor: color }}
                       />
                     ))}
@@ -127,10 +208,10 @@ export default function Home() {
               </span>
               <button
                 onClick={() => setEnableEmbedding(!enableEmbedding)}
-                className={`px-4 py-2 border rounded-full text-sm font-mono transition-all ${
+                className={`px-4 py-2 border-2 rounded-full text-sm font-mono transition-all shadow-lg ${
                   enableEmbedding 
-                    ? 'bg-[#8b5cf6]/20 border-[#8b5cf6]/40 text-[#8b5cf6] shadow-lg'  
-                    : 'bg-[#b5e853]/10 border-[#b5e853]/30 text-[#b5e853] hover:bg-[#b5e853]/15'
+                    ? 'bg-[#8b5cf6]/20 border-[#8b5cf6]/60 text-[#8b5cf6] shadow-[#8b5cf6]/20'  
+                    : 'bg-[#8b5cf6]/10 border-[#8b5cf6]/40 text-[#8b5cf6] hover:bg-[#8b5cf6]/15 hover:border-[#8b5cf6]/60 hover:shadow-[#8b5cf6]/20'
                 }`}
               >
                 {enableEmbedding ? 'Embedding ON' : 'Hide your code'}
@@ -148,17 +229,17 @@ export default function Home() {
                     setEncryptionKey('');
                   }
                 }}
-                className={`px-4 py-2 border rounded-full text-sm font-mono transition-all ${
+                className={`px-4 py-2 border-2 rounded-full text-sm font-mono transition-all shadow-lg ${
                   useEncryption 
-                    ? 'bg-[#8b5cf6]/20 border-[#8b5cf6]/40 text-[#8b5cf6] shadow-lg' 
-                    : 'bg-[#b5e853]/10 border-[#8b5cf6]/40 text-[#b5e853] hover:bg-[#b5e853]/15'
+                    ? 'bg-[#8b5cf6]/20 border-[#8b5cf6]/60 text-[#8b5cf6] shadow-[#8b5cf6]/20' 
+                    : 'bg-[#8b5cf6]/10 border-[#8b5cf6]/40 text-[#8b5cf6] hover:bg-[#8b5cf6]/15 hover:border-[#8b5cf6]/60 hover:shadow-[#8b5cf6]/20'
                 }`}
               >
                 {useEncryption ? '🔐 Encrypted' : '🔐 Encrypt'}
               </button>
               <button
                 onClick={() => setIsDecodeModalOpen(true)}
-                className="px-4 py-2 bg-[#b5e853]/20 border border-[#b5e853]/40 rounded-full text-[#b5e853] text-sm font-mono hover:bg-[#b5e853]/30 transition-colors"
+                className="px-4 py-2 bg-[#8b5cf6]/10 border-2 border-[#8b5cf6]/40 rounded-full text-[#8b5cf6] text-sm font-mono hover:bg-[#8b5cf6]/20 hover:border-[#8b5cf6]/60 transition-all shadow-lg hover:shadow-[#8b5cf6]/20"
               >
                 🔓 Decode Art
               </button>

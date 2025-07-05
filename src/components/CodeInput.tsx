@@ -12,7 +12,7 @@ export default function CodeInput({ onSubmit, submitted = false }: CodeInputProp
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!code.trim()) {
-      setError('Please enter a code snippet.');
+      setError('Please enter some content to transform into pixel art.');
       return;
     }
     
@@ -36,16 +36,14 @@ export default function CodeInput({ onSubmit, submitted = false }: CodeInputProp
       <form onSubmit={handleSubmit} className="bg-[#18181b] border border-[#282828] rounded-lg shadow-2xl overflow-hidden">
         <div className="p-6 border-b border-[#282828]">
           <label className="font-semibold text-[#b5e853] tracking-widest uppercase text-sm block mb-4">
-            Code Snippet
+            Type or paste here
           </label>
           
           <div className="border border-[#282828] rounded-lg font-mono text-sm bg-[#111] overflow-hidden">
             <textarea
               value={code}
               onChange={(e) => setCode(e.target.value)}
-              placeholder="Paste your code here...
-Supports any programming language
-Large code snippets are welcome!"
+              placeholder="Type or paste your code or even secret message (who's stopping you!) here..."
               className="w-full bg-[#111] text-[#b5e853] font-mono text-sm leading-relaxed resize-vertical outline-none border-none p-5 scrollbar-thin scrollbar-track-[#111] scrollbar-thumb-[#b5e853]/30 hover:scrollbar-thumb-[#b5e853]/50"
               style={{
                 fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace',

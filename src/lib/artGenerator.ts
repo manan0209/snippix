@@ -42,6 +42,7 @@ export function generatePixelArt(
 ): void {
   const { width, height, pixelSize, colors } = config;
   
+  // Clear canvas with background color
   ctx.fillStyle = colors[4] || '#18181b';
   ctx.fillRect(0, 0, width, height);
 
@@ -50,55 +51,255 @@ export function generatePixelArt(
   const cols = Math.floor(width / pixelSize);
   const rows = Math.floor(height / pixelSize);
 
-  const codeBytes = new TextEncoder().encode(code);
+  // Determine what type of pixel art to generate based on code characteristics
+  const artType = determineArtType(features, hash);
+  
+  switch (artType) {
+    case 'creature':
+      generateCreatureArt(ctx, config, features, hash, cols, rows);
+      break;
+    case 'landscape':
+      generateLandscapeArt(ctx, config, features, hash, cols, rows);
+      break;
+    case 'geometric':
+      generateGeometricArt(ctx, config, features, hash, cols, rows);
+      break;
+    case 'cosmic':
+      generateCosmicArt(ctx, config, features, hash, cols, rows);
+      break;
+    default:
+      generateAbstractArt(ctx, config, features, hash, cols, rows);
+  }
+
+  // Add signature structural elements (these don't interfere with steganography)
+  addStructuralElements(ctx, code, features, config, hash);
+}
+
+function determineArtType(features: CodeFeatures, hash: number): string {
+  const types = ['creature', 'landscape', 'geometric', 'cosmic', 'abstract'];
+  
+  // Use code characteristics to deterministically choose art type
+  let selector = hash;
+  if (features.symbols > 50) selector += 1;
+  if (features.lines > 20) selector += 2;
+  if (features.length > 1000) selector += 3;
+  if (features.indent > 2) selector += 4;
+  
+  return types[selector % types.length];
+}
+
+function generateCreatureArt(ctx: CanvasRenderingContext2D, config: ArtConfig, features: CodeFeatures, hash: number, cols: number, rows: number): void {
+  const { pixelSize, colors } = config;
+  const centerX = Math.floor(cols / 2);
+  const centerY = Math.floor(rows / 2);
+  
+  // Generate creature-like symmetrical patterns
+  const size = Math.min(cols, rows) * 0.4;
   
   for (let layer = 0; layer < 3; layer++) {
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
-        const idx = (y * cols + x) % codeBytes.length;
-        const byte = codeBytes[idx] || 0;
+        const dx = x - centerX;
+        const dy = y - centerY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx);
         
-        const layerSeed = hash + layer * 1000;
-        const pattern = (byte + x * 7 + y * 13 + layerSeed) % 256;
+        // Create creature body with symmetry
+        let shouldDraw = false;
+        let colorIdx = 0;
         
-        const densities = [0.3, 0.15, 0.08];
-        const threshold = densities[layer] * 256;
-        
-        if (pattern > threshold) {
-          let colorIdx;
-          switch (layer) {
-            case 0:
-              colorIdx = (byte + x + y) % (colors.length - 1);
-              break;
-            case 1:
-              colorIdx = features.symbols > 0 ? 
-                ((byte * features.symbols + x) % (colors.length - 1)) : 0;
-              break;
-            case 2:
-              colorIdx = 0;
-              break;
-            default:
-              colorIdx = 0;
+        if (layer === 0 && distance < size) {
+          // Main body - oval shape
+          const ovalFactor = 1.2 + Math.sin(hash * 0.01) * 0.3;
+          const bodyShape = (dx * dx) / (size * size) + (dy * dy) / ((size * ovalFactor) * (size * ovalFactor));
+          if (bodyShape < 0.8) {
+            shouldDraw = true;
+            colorIdx = (hash + Math.floor(distance)) % (colors.length - 1);
           }
-          
-          if ((byte + hash + x * y) % 100 < 15) {
+        } else if (layer === 1 && distance < size * 0.7) {
+          // Inner details - spots or stripes
+          const pattern = Math.sin(distance * 0.5 + hash * 0.01) * Math.cos(angle * 4 + hash * 0.02);
+          if (pattern > 0.3) {
+            shouldDraw = true;
             colorIdx = (colorIdx + 1) % (colors.length - 1);
           }
+        } else if (layer === 2) {
+          // Eyes and features
+          const eyeDistance1 = Math.sqrt((dx - size * 0.3) * (dx - size * 0.3) + (dy - size * 0.4) * (dy - size * 0.4));
+          const eyeDistance2 = Math.sqrt((dx + size * 0.3) * (dx + size * 0.3) + (dy - size * 0.4) * (dy - size * 0.4));
           
+          if (eyeDistance1 < size * 0.15 || eyeDistance2 < size * 0.15) {
+            shouldDraw = true;
+            colorIdx = 0; // Primary color for eyes
+          }
+        }
+        
+        if (shouldDraw) {
           ctx.fillStyle = colors[colorIdx];
-          
-          ctx.fillRect(
-            x * pixelSize, 
-            y * pixelSize, 
-            pixelSize, 
-            pixelSize
-          );
+          ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
         }
       }
     }
   }
+}
 
-  addStructuralElements(ctx, code, features, config, hash);
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
+function generateLandscapeArt(ctx: CanvasRenderingContext2D, config: ArtConfig, features: CodeFeatures, hash: number, cols: number, rows: number): void {
+  const { pixelSize, colors } = config;
+  
+  // Generate hills/mountains using sine waves
+  const hillHeight = rows * 0.6;
+  const frequency = 0.1 + (hash % 100) * 0.001;
+  
+  for (let x = 0; x < cols; x++) {
+    // Create multiple hill layers
+    const hill1 = Math.sin(x * frequency + hash * 0.01) * hillHeight * 0.3;
+    const hill2 = Math.sin(x * frequency * 1.5 + hash * 0.02) * hillHeight * 0.2;
+    const hill3 = Math.sin(x * frequency * 0.7 + hash * 0.03) * hillHeight * 0.4;
+    
+    const groundLevel = rows * 0.7 + hill1 + hill2 + hill3;
+    
+    for (let y = 0; y < rows; y++) {
+      let shouldDraw = false;
+      let colorIdx = 0;
+      
+      if (y > groundLevel) {
+        // Ground
+        shouldDraw = true;
+        colorIdx = (hash + x + y) % (colors.length - 1);
+      } else if (y > groundLevel - 5 && seededRandom(hash + x * 17 + y * 23) * 100 < 30) {
+        // Grass/vegetation
+        shouldDraw = true;
+        colorIdx = 0;
+      } else if (y < rows * 0.3 && seededRandom(hash + x * 13 + y * 29) * 100 < 10) {
+        // Sky elements (clouds, birds)
+        shouldDraw = true;
+        colorIdx = 1;
+      }
+      
+      if (shouldDraw) {
+        ctx.fillStyle = colors[colorIdx];
+        ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+      }
+    }
+  }
+}
+
+function generateGeometricArt(ctx: CanvasRenderingContext2D, config: ArtConfig, features: CodeFeatures, hash: number, cols: number, rows: number): void {
+  const { pixelSize, colors } = config;
+  
+  // Generate geometric patterns based on code features
+  const patternSize = 8 + (hash % 16);
+  
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const patternX = x % patternSize;
+      const patternY = y % patternSize;
+      
+      let shouldDraw = false;
+      let colorIdx = 0;
+      
+      // Create various geometric patterns
+      if (features.symbols > 20) {
+        // Diamond pattern
+        if (Math.abs(patternX - patternSize/2) + Math.abs(patternY - patternSize/2) < patternSize/3) {
+          shouldDraw = true;
+          colorIdx = (x + y + hash) % (colors.length - 1);
+        }
+      } else if (features.lines > 10) {
+        // Checkerboard with variations
+        if ((patternX + patternY + hash) % 4 < 2) {
+          shouldDraw = true;
+          colorIdx = ((x / patternSize) + (y / patternSize)) % (colors.length - 1);
+        }
+      } else {
+        // Concentric squares
+        const distance = Math.max(Math.abs(patternX - patternSize/2), Math.abs(patternY - patternSize/2));
+        if (distance % 3 === hash % 3) {
+          shouldDraw = true;
+          colorIdx = distance % (colors.length - 1);
+        }
+      }
+      
+      if (shouldDraw) {
+        ctx.fillStyle = colors[colorIdx];
+        ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+      }
+    }
+  }
+}
+
+function generateCosmicArt(ctx: CanvasRenderingContext2D, config: ArtConfig, features: CodeFeatures, hash: number, cols: number, rows: number): void {
+  const { pixelSize, colors } = config;
+  const centerX = cols / 2;
+  const centerY = rows / 2;
+  
+  // Generate cosmic/space-like patterns
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const dx = x - centerX;
+      const dy = y - centerY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const angle = Math.atan2(dy, dx);
+      
+      let shouldDraw = false;
+      let colorIdx = 0;
+      
+      // Stars (deterministic)
+      if (seededRandom(hash + x * 31 + y * 37) * 1000 < 3) {
+        shouldDraw = true;
+        colorIdx = 0;
+      }
+      
+      // Spiral galaxy arms
+      const spiralAngle = angle + distance * 0.1 + hash * 0.01;
+      const spiralPattern = Math.sin(spiralAngle * 3) * Math.exp(-distance * 0.01);
+      
+      if (spiralPattern > 0.7 && distance > 10) {
+        shouldDraw = true;
+        colorIdx = (Math.floor(distance / 10) + hash) % (colors.length - 1);
+      }
+      
+      // Central bright area
+      if (distance < 15) {
+        const brightness = 1 - (distance / 15);
+        if (seededRandom(hash + x * 41 + y * 43) < brightness * 0.5) {
+          shouldDraw = true;
+          colorIdx = Math.floor(brightness * (colors.length - 1));
+        }
+      }
+      
+      if (shouldDraw) {
+        ctx.fillStyle = colors[colorIdx];
+        ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+      }
+    }
+  }
+}
+
+function generateAbstractArt(ctx: CanvasRenderingContext2D, config: ArtConfig, features: CodeFeatures, hash: number, cols: number, rows: number): void {
+  const { pixelSize, colors } = config;
+  
+  // Generate flowing abstract patterns
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const pattern1 = Math.sin(x * 0.1 + hash * 0.01) * Math.cos(y * 0.1 + hash * 0.02);
+      const pattern2 = Math.sin(x * 0.05 + y * 0.05 + hash * 0.01);
+      const pattern3 = Math.cos((x + y) * 0.08 + hash * 0.03);
+      
+      const combined = pattern1 + pattern2 * 0.5 + pattern3 * 0.3;
+      
+      if (combined > 0.5) {
+        const colorIdx = Math.floor((combined + 1) * (colors.length - 1) / 2);
+        ctx.fillStyle = colors[Math.min(colorIdx, colors.length - 1)];
+        ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+      }
+    }
+  }
 }
 
 function addStructuralElements(

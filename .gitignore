@@ -34,6 +34,8 @@ src/uploads/
 *.uploaded
 user-files/
 generated-art/
+data/
+/data/
 
 # sensitive files and keys
 *.key
