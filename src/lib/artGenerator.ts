@@ -73,6 +73,9 @@ export function generatePixelArt(
 
   // Add signature structural elements (these don't interfere with steganography)
   addStructuralElements(ctx, code, features, config, hash);
+  
+  // CRITICAL FIX: Ensure minimum visibility for sparse patterns
+  ensureMinimumVisibility(ctx, config, features, hash, cols, rows);
 }
 
 function determineArtType(features: CodeFeatures, hash: number): string {
@@ -109,17 +112,17 @@ function generateCreatureArt(ctx: CanvasRenderingContext2D, config: ArtConfig, f
         let colorIdx = 0;
         
         if (layer === 0 && distance < size) {
-          // Main body - oval shape
+          // Main body - oval shape with more density
           const ovalFactor = 1.2 + Math.sin(hash * 0.01) * 0.3;
           const bodyShape = (dx * dx) / (size * size) + (dy * dy) / ((size * ovalFactor) * (size * ovalFactor));
-          if (bodyShape < 0.8) {
+          if (bodyShape < 0.9) { // Increased from 0.8 to 0.9 for more coverage
             shouldDraw = true;
             colorIdx = (hash + Math.floor(distance)) % (colors.length - 1);
           }
-        } else if (layer === 1 && distance < size * 0.7) {
-          // Inner details - spots or stripes
+        } else if (layer === 1 && distance < size * 0.8) { // Increased from 0.7 to 0.8
+          // Inner details - spots or stripes with lower threshold
           const pattern = Math.sin(distance * 0.5 + hash * 0.01) * Math.cos(angle * 4 + hash * 0.02);
-          if (pattern > 0.3) {
+          if (pattern > 0.1) { // Reduced from 0.3 to 0.1 for more pattern density
             shouldDraw = true;
             colorIdx = (colorIdx + 1) % (colors.length - 1);
           }
@@ -171,12 +174,12 @@ function generateLandscapeArt(ctx: CanvasRenderingContext2D, config: ArtConfig, 
         // Ground
         shouldDraw = true;
         colorIdx = (hash + x + y) % (colors.length - 1);
-      } else if (y > groundLevel - 5 && seededRandom(hash + x * 17 + y * 23) * 100 < 30) {
-        // Grass/vegetation
+      } else if (y > groundLevel - 8 && seededRandom(hash + x * 17 + y * 23) * 100 < 50) {
+        // Grass/vegetation - increased density and area
         shouldDraw = true;
         colorIdx = 0;
-      } else if (y < rows * 0.3 && seededRandom(hash + x * 13 + y * 29) * 100 < 10) {
-        // Sky elements (clouds, birds)
+      } else if (y < rows * 0.4 && seededRandom(hash + x * 13 + y * 29) * 100 < 25) {
+        // Sky elements (clouds, birds) - increased probability from 10 to 25
         shouldDraw = true;
         colorIdx = 1;
       }
@@ -351,6 +354,81 @@ function addStructuralElements(
       ctx.fillRect(x - size/2, y - size/2, size, size);
     }
     ctx.globalAlpha = 1;
+  }
+}
+
+/**
+ * Ensures that even sparse patterns have some visual elements
+ * This prevents completely blank-looking art while preserving steganographic data
+ */
+function ensureMinimumVisibility(
+  ctx: CanvasRenderingContext2D, 
+  config: ArtConfig, 
+  features: CodeFeatures, 
+  hash: number, 
+  cols: number, 
+  rows: number
+): void {
+  const { pixelSize, colors } = config;
+  
+  // Check if we need minimum visibility (for short/simple text)
+  const needsMinimumVisibility = 
+    features.length < 100 || 
+    features.lines < 5 || 
+    (features.symbols < 10 && features.digits < 5);
+  
+  if (needsMinimumVisibility) {
+    // Add subtle but visible pattern that works with any palette
+    const centerX = Math.floor(cols / 2);
+    const centerY = Math.floor(rows / 2);
+    const radius = Math.min(cols, rows) * 0.15; // Small central pattern
+    
+    // Create a deterministic pattern based on the text hash
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const dx = x - centerX;
+        const dy = y - centerY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // Multiple pattern layers for guaranteed visibility
+        let shouldDraw = false;
+        let colorIdx = 0;
+        
+        // Pattern 1: Central spiral
+        if (distance < radius) {
+          const angle = Math.atan2(dy, dx);
+          const spiral = Math.sin(distance * 0.8 + angle * 3 + hash * 0.01) > 0.4;
+          if (spiral) {
+            shouldDraw = true;
+            colorIdx = 0;
+          }
+        }
+        
+        // Pattern 2: Corner accents (always visible)
+        const cornerDistance1 = Math.sqrt((x - 2) * (x - 2) + (y - 2) * (y - 2));
+        const cornerDistance2 = Math.sqrt((x - (cols - 3)) * (x - (cols - 3)) + (y - 2) * (y - 2));
+        const cornerDistance3 = Math.sqrt((x - 2) * (x - 2) + (y - (rows - 3)) * (y - (rows - 3)));
+        const cornerDistance4 = Math.sqrt((x - (cols - 3)) * (x - (cols - 3)) + (y - (rows - 3)) * (y - (rows - 3)));
+        
+        if (cornerDistance1 < 3 || cornerDistance2 < 3 || cornerDistance3 < 3 || cornerDistance4 < 3) {
+          if (seededRandom(hash + x * 7 + y * 11) > 0.6) {
+            shouldDraw = true;
+            colorIdx = 1;
+          }
+        }
+        
+        // Pattern 3: Scattered pixels for texture (very subtle)
+        if (!shouldDraw && seededRandom(hash + x * 13 + y * 17) > 0.92) {
+          shouldDraw = true;
+          colorIdx = (hash + x + y) % (colors.length - 1);
+        }
+        
+        if (shouldDraw) {
+          ctx.fillStyle = colors[colorIdx];
+          ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+        }
+      }
+    }
   }
 }
 

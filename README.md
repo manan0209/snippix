@@ -1,59 +1,64 @@
 # Snippix
 
-Code art generator that transforms source code into pixel art patterns with steganographic embedding capabilities. Built with Next.js, React, and TypeScript.
+A sophisticated code art generator that transforms any text or code into beautiful pixel art with advanced steganographic capabilities. Built with Next.js, React, and TypeScript.
+
+🎨 **[Try Snippix Live](https://snippixbymnn.vercel.app/)**
 
 ## Features
 
-- Generate deterministic pixel art from any text input
-- Multiple color palettes and configurable pixel sizes
-- LSB steganography for embedding code within pixel data
-- Optional XOR encryption with user-provided keys
-- Browser-compatible PNG downloads with embedded data preservation
-- Client-side processing without external dependencies
-- Decode embedded code from generated images
+- **Intelligent Art Generation**: Creates recognizable pixel art patterns including creatures, landscapes, geometric designs, cosmic scenes, and abstract art based on content analysis
+- **Universal Content Support**: Accepts any text input - code, messages, poetry, or stories
+- **Multiple Art Styles**: Deterministic algorithms generate distinct visual styles based on content characteristics  
+- **Interactive Color Palettes**: Live palette switching with visual preview
+- **LSB Steganography**: Robust pixel-based embedding using Least Significant Bit encoding
+- **XOR Encryption**: Optional password protection for embedded content
+- **Global Community Features**: Real-time heart counter showing community engagement
+- **Production Ready**: Zero dependencies, client-side processing, reliable PNG downloads
 
 ## Usage
 
-### Basic Art Generation
-1. Input source code or text in any format
-2. Select color palette and pixel size
-3. Generate and download pixel art as PNG
+### Art Generation
+1. Enter any text content in the input field
+2. Select from available color palettes using the interactive selector
+3. Generate pixel art with automatic style selection based on content
+4. Download high-quality PNG files
 
-### Code Embedding
-1. Enable embedding option in the interface
-2. Optionally set encryption password for security
-3. Generate art with code embedded in pixel LSB data
-4. Share downloaded PNG files - embedded data survives compression
+### Content Embedding
+1. Enable embedding to hide text within pixel data
+2. Optionally add encryption with custom password
+3. Generated images preserve embedded data through downloads and sharing
+4. Works with any content type - code, messages, or documents
 
-### Code Extraction
-1. Upload Snippix-generated image using decode modal
-2. Enter decryption password if image was encrypted
-3. Extract embedded code with copy and download options
+### Content Extraction  
+1. Use the decode feature to extract hidden content from Snippix images
+2. Enter decryption password if the image was encrypted
+3. Copy extracted text or download as file
 
-## Technical Implementation
+## Technical Architecture
 
-### Core Components
-- **Art Generation**: Deterministic algorithms based on code structure analysis
-- **Steganography**: Least Significant Bit encoding in RGB channels
-- **Encryption**: XOR cipher with user-provided keys
-- **File Handling**: Canvas-to-blob conversion for reliable downloads
+### Core Systems
+- **Art Engine**: Five distinct algorithms (creature, landscape, geometric, cosmic, abstract)
+- **Steganography**: UTF-8 compatible LSB encoding with error handling
+- **Encryption**: XOR cipher with password-based security
+- **UI/UX**: Professional interface with interactive elements and real-time feedback
 
-### Architecture
+### Project Structure
 
 ```
 /src
   /lib
-    - artGenerator.ts        # Pixel art generation algorithms  
-    - steganography.ts       # LSB encoding/decoding
-    - palettes.ts           # Color scheme definitions
+    - artGenerator.ts        # Multi-style pixel art generation
+    - steganography.ts       # LSB encoding/decoding with UTF-8 support  
+    - palettes.ts           # Color palette definitions and selectors
   /components
-    - CodeInput.tsx         # Text input interface
-    - ArtCanvas.tsx         # Canvas rendering component
-    - DecodeArtModal.tsx    # Extraction interface
-    - DownloadButton.tsx    # File download handling
+    - CodeInput.tsx         # Universal text input interface
+    - ArtCanvas.tsx         # Canvas rendering and art generation
+    - DecodeArtModal.tsx    # Content extraction interface
+    - DownloadButton.tsx    # File download management
   /app
-    - page.tsx             # Main application
-    - layout.tsx           # Application layout
+    - page.tsx             # Main application with global state
+    - layout.tsx           # Application layout and metadata
+    - /api/hearts          # Global community counter API
 ```
 
 ## Development
@@ -61,6 +66,15 @@ Code art generator that transforms source code into pixel art patterns with steg
 ```bash
 npm install
 npm run dev
+npm run build
 ```
 
-Built for Hack Club Summer of Code 2025.
+📚 **[Read HOW_IT_WORKS.md](./HOW_IT_WORKS.md)** for a detailed technical explanation of the algorithms and architecture.
+
+## Deployment
+
+Optimized for Vercel deployment with API routes for community features. All steganographic operations run client-side for privacy and reliability.
+
+---
+
+Built for Hack Club Summer of Code 2025
