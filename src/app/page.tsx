@@ -46,7 +46,7 @@ export default function Home() {
       const response = await fetch('/api/hearts');
       const data = await response.json();
       setHeartCount(data.count || 0);
-    } catch (error) {
+    } catch {
       console.log('Could not fetch global hearts');
       setHeartCount(42); // Fallback number
     }
@@ -68,7 +68,7 @@ export default function Home() {
       setPersonalHearts(newPersonalCount);
       localStorage.setItem('snippix-personal-hearts', newPersonalCount.toString());
       
-    } catch (error) {
+    } catch {
       console.log('Could not increment hearts');
       // Fallback to local increment
       setHeartCount(prev => prev + 1);

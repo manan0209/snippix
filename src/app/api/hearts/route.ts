@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 // Simple in-memory store (will persist during server lifetime)
 // For production, you'd want to use a database or KV store
@@ -25,7 +25,7 @@ function loadHeartCount(): number {
       const parsed = JSON.parse(data);
       return parsed.count || globalHeartCount;
     }
-  } catch (error) {
+  } catch {
     console.log('Could not load heart count, using default');
   }
   return globalHeartCount;
@@ -35,7 +35,7 @@ function saveHeartCount(count: number) {
   try {
     ensureDataDir();
     fs.writeFileSync(DATA_FILE, JSON.stringify({ count, lastUpdated: new Date().toISOString() }));
-  } catch (error) {
+  } catch {
     console.log('Could not save heart count');
   }
 }
@@ -50,11 +50,8 @@ export async function GET() {
   });
 }
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
-    // Rate limiting: simple check to prevent spam
-    const userAgent = request.headers.get('user-agent') || '';
-    
     // Increment the global count
     globalHeartCount += 1;
     
@@ -65,7 +62,7 @@ export async function POST(request: NextRequest) {
       count: globalHeartCount,
       message: 'Thank you for showing love! ❤️'
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Failed to increment hearts' },
       { status: 500 }
