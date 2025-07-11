@@ -2,7 +2,7 @@
 
 A sophisticated code art generator that transforms any text or code into beautiful pixel art with advanced steganographic capabilities. Built with Next.js, React, and TypeScript.
 
-🎨 **[Try Snippix Live](https://snippixbymnn.vercel.app/)**
+**[Try Snippix Live](https://snippixbymnn.vercel.app/)**
 
 ## Features
 
@@ -69,7 +69,7 @@ npm run dev
 npm run build
 ```
 
-📚 **[Read HOW_IT_WORKS.md](./HOW_IT_WORKS.md)** for a detailed technical explanation of the algorithms and architecture.
+**[Read HOW_IT_WORKS.md](./HOW_IT_WORKS.md)** for a detailed technical explanation of the algorithms and architecture.
 
 ## Deployment
 

@@ -27,6 +27,7 @@ export default function Home() {
   const [heartCount, setHeartCount] = useState(0);
   const [personalHearts, setPersonalHearts] = useState(0);
   const [isHeartLoading, setIsHeartLoading] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Load global heart count and personal count on component mount
@@ -136,7 +137,7 @@ export default function Home() {
         </div>
         
         {/* Global Heart Counter */}
-        <div className="fixed top-4 right-4 z-50">
+        <div className="fixed top-4 right-4 z-50 flex flex-col items-end gap-2">
           <button
             onClick={handleHeartClick}
             disabled={isHeartLoading}
@@ -160,6 +161,64 @@ export default function Home() {
               )}
             </div>
           </button>
+          {/* Video button with label and tooltip */}
+          <div className="relative group">
+            <button
+              onClick={() => setIsVideoModalOpen(true)}
+              className="flex items-center gap-1 px-3 py-1 bg-[#18181b]/80 border border-[#b5e853]/30 rounded-full text-[#b5e853] text-xs font-mono hover:bg-[#b5e853]/10 hover:border-[#b5e853]/60 transition-all shadow group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#b5e853]"
+              title="Watch Snippix Demo"
+              aria-label="Watch Snippix Demo"
+              tabIndex={0}
+              type="button"
+            >
+              <svg className="w-4 h-4 text-[#b5e853]" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M4.018 14L14.41 9.053a1 1 0 000-1.894L4.018 2A1 1 0 003 2.894v10.212A1 1 0 004.018 14z" />
+              </svg>
+              <span className="ml-1 font-semibold">Demo</span>
+            </button>
+          </div>
+      {/* Video Modal with heading, animation, close on background click, and responsive aspect ratio */}
+      {isVideoModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fadeIn"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsVideoModalOpen(false);
+          }}
+          aria-modal="true"
+          role="dialog"
+        >
+          <div
+            className="bg-[#18181b] border border-[#b5e853]/30 rounded-xl shadow-2xl p-4 w-full max-w-xs sm:max-w-sm md:max-w-lg relative animate-modalIn"
+            style={{ boxShadow: '0 8px 40px 0 #b5e85333' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-[#b5e853] mb-3 text-center font-mono tracking-wide">Snippix Demo</h3>
+            <button
+              onClick={() => setIsVideoModalOpen(false)}
+              className="absolute top-2 right-2 text-[#b5e853] bg-[#18181b] border border-[#b5e853]/30 rounded-full p-1 hover:bg-[#b5e853]/10 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#b5e853]"
+              aria-label="Close video modal"
+              type="button"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="w-full aspect-video rounded overflow-hidden bg-black">
+              <iframe
+                width="560"
+                height="315"
+                src="https://www.youtube.com/embed/aBpQTa6OvZM"
+                title="Snippix Demo Video"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full rounded"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      )}
+
         </div>
       <div className="fixed inset-0 pointer-events-none opacity-[0.03]">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYjVlODUzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')]"></div>
@@ -216,33 +275,49 @@ export default function Home() {
               >
                 {enableEmbedding ? 'Embedding ON' : 'Hide your code'}
               </button>
-              <button
-                onClick={() => {
-                  if (!enableEmbedding) {
-                    setEnableEmbedding(true);
-                  }
-                  setUseEncryption(!useEncryption);
-                  if (!useEncryption) {
-                    setShowKeyInput(true);
-                  } else {
-                    setShowKeyInput(false);
-                    setEncryptionKey('');
-                  }
-                }}
-                className={`px-4 py-2 border-2 rounded-full text-sm font-mono transition-all shadow-lg ${
-                  useEncryption 
-                    ? 'bg-[#8b5cf6]/20 border-[#8b5cf6]/60 text-[#8b5cf6] shadow-[#8b5cf6]/20' 
-                    : 'bg-[#8b5cf6]/10 border-[#8b5cf6]/40 text-[#8b5cf6] hover:bg-[#8b5cf6]/15 hover:border-[#8b5cf6]/60 hover:shadow-[#8b5cf6]/20'
-                }`}
-              >
-                {useEncryption ? '🔐 Encrypted' : '🔐 Encrypt'}
-              </button>
-              <button
-                onClick={() => setIsDecodeModalOpen(true)}
-                className="px-4 py-2 bg-[#8b5cf6]/10 border-2 border-[#8b5cf6]/40 rounded-full text-[#8b5cf6] text-sm font-mono hover:bg-[#8b5cf6]/20 hover:border-[#8b5cf6]/60 transition-all shadow-lg hover:shadow-[#8b5cf6]/20"
-              >
-                🔓 Decode Art
-              </button>
+              <div className="relative flex flex-col items-center">
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none select-none z-10">
+                  <span className="text-xs font-mono text-[#18181b] bg-[#b5e853] px-2 py-1 rounded border border-[#b5e853] shadow-lg mb-0.5 animate-pulse drop-shadow-lg" style={{filter:'brightness(1.2)'}}>Try Me!</span>
+                  <svg className="w-4 h-4 text-[#b5e853] animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginTop:'-2px'}} aria-hidden="true" focusable="false">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 16l-4-4m4 4l4-4" />
+                  </svg>
+                </div>
+                <button
+                  onClick={() => {
+                    if (!enableEmbedding) {
+                      setEnableEmbedding(true);
+                    }
+                    setUseEncryption(!useEncryption);
+                    if (!useEncryption) {
+                      setShowKeyInput(true);
+                    } else {
+                      setShowKeyInput(false);
+                      setEncryptionKey('');
+                    }
+                  }}
+                  className={`px-4 py-2 border-2 rounded-full text-sm font-mono transition-all shadow-lg ${
+                    useEncryption 
+                      ? 'bg-[#8b5cf6]/20 border-[#8b5cf6]/60 text-[#8b5cf6] shadow-[#8b5cf6]/20' 
+                      : 'bg-[#8b5cf6]/10 border-[#8b5cf6]/40 text-[#8b5cf6] hover:bg-[#8b5cf6]/15 hover:border-[#8b5cf6]/60 hover:shadow-[#8b5cf6]/20'
+                  }`}
+                >
+                  {useEncryption ? '🔐 Encrypted with key' : '🔐 Encrypt with key'}
+                </button>
+              </div>
+              <div className="relative flex flex-col items-center">
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none select-none z-10">
+                  <span className="text-xs font-mono text-[#18181b] bg-[#b5e853] px-2 py-1 rounded border border-[#b5e853] shadow-lg mb-0.5 animate-pulse drop-shadow-lg" style={{filter:'brightness(1.2)'}}>Try Me!</span>
+                  <svg className="w-4 h-4 text-[#b5e853] animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginTop:'-2px'}} aria-hidden="true" focusable="false">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 16l-4-4m4 4l4-4" />
+                  </svg>
+                </div>
+                <button
+                  onClick={() => setIsDecodeModalOpen(true)}
+                  className="px-4 py-2 bg-[#8b5cf6]/10 border-2 border-[#8b5cf6]/40 rounded-full text-[#8b5cf6] text-sm font-mono hover:bg-[#8b5cf6]/20 hover:border-[#8b5cf6]/60 transition-all shadow-lg hover:shadow-[#8b5cf6]/20"
+                >
+                  🔓 Decode Art
+                </button>
+              </div>
             </div>
             
             {showKeyInput && useEncryption && (
@@ -317,17 +392,48 @@ export default function Home() {
                       </div>
                     )}
                     
-                    <div className="relative">
-                      <ArtCanvas 
-                        ref={canvasRef}
-                        code={submitted.code}
-                        config={artConfig}
-                        embedOptions={enableEmbedding ? {
-                          useEncryption: useEncryption && encryptionKey.length > 0,
-                          encryptionKey: useEncryption ? encryptionKey : undefined
-                        } : undefined}
-                      />
-                      
+                    <div className="flex flex-col items-center relative">
+                      {/* Try Me tooltip/arrow above palette button, slightly left from right edge */}
+                      <div className="mb-2 w-full flex justify-end pr-5 sm:pr-8 md:pr-10 lg:pr-10 xl:pr-5">
+                        <div className="flex flex-col items-center pointer-events-none select-none">
+                          <span className="text-xs font-mono text-[#18181b] bg-[#b5e853] px-2 py-1 rounded border border-[#b5e853] shadow-lg mb-0.5 animate-pulse drop-shadow-lg" style={{filter:'brightness(1.2)'}}>Try Me!</span>
+                          <svg className="w-4 h-4 text-[#b5e853] animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{marginTop:'-2px'}} aria-hidden="true" focusable="false">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 16l-4-4m4 4l4-4" />
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="relative w-full flex justify-end">
+                        <ArtCanvas 
+                          ref={canvasRef}
+                          code={submitted.code}
+                          config={artConfig}
+                          embedOptions={enableEmbedding ? {
+                            useEncryption: useEncryption && encryptionKey.length > 0,
+                            encryptionKey: useEncryption ? encryptionKey : undefined
+                          } : undefined}
+                        />
+                        {/* Floating palette selector button */}
+                        <button
+                          onClick={handlePaletteChange}
+                          title={`Change palette (${PALETTES.length} available)`}
+                          className="absolute top-3 right-3 z-20 rounded-full p-2 flex items-center gap-1 shadow-lg border border-white/30 hover:scale-105 transition-all group"
+                          style={{ minWidth: 32, minHeight: 32, backgroundColor: selectedPalette.colors[0], color: '#18181b', borderColor: selectedPalette.colors[1] || '#b5e853' }}
+                          aria-label="Change Palette"
+                        >
+                          <div className="flex gap-0.5">
+                            {selectedPalette.colors.slice(0, 3).map((color, i) => (
+                              <div
+                                key={i}
+                                className="w-3 h-3 rounded-full border border-white/40"
+                                style={{ backgroundColor: color }}
+                              />
+                            ))}
+                          </div>
+                          <svg className="w-4 h-4 opacity-60 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                      </div>
                       <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm rounded-lg p-3 text-left">
                         <div className="text-[#b5e853] text-xs font-mono space-y-1">
                           <div>{submitted.code.length} chars</div>
