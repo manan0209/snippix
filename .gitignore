@@ -63,4 +63,5 @@ next-env.d.ts
 # docs and development files
 VERSION.md
 ROADMAP.md
-
+upmeta.js
+system.sh
