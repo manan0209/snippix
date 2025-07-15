@@ -35,7 +35,6 @@ export default function Home() {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [easterEggClicks, setEasterEggClicks] = useState(0);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
-  const [showContactModal, setShowContactModal] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Load global heart count and personal count on component mount
