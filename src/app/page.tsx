@@ -12,6 +12,11 @@ const CANVAS_WIDTH = 600;
 const CANVAS_HEIGHT = 400;
 const OPTIMAL_PIXEL_SIZE = 12; // Optimal size for art generation (doesn't affect embedding)
 
+// Version system for resetting personal counts globally
+const HEARTS_VERSION = "v2"; // Change this to reset everyone's personal counts
+const HEARTS_KEY = `snippix-personal-hearts-${HEARTS_VERSION}`;
+const EASTER_EGG_KEY = `snippix-easter-egg-clicks-${HEARTS_VERSION}`;
+
 export default function Home() {
   const [submitted, setSubmitted] = useState<{
     code: string;
@@ -35,17 +40,24 @@ export default function Home() {
 
   // Load global heart count and personal count on component mount
   useEffect(() => {
-    // Load personal count from localStorage
-    const savedPersonalHearts = localStorage.getItem('snippix-personal-hearts');
+    // Load personal count from localStorage with version
+    const savedPersonalHearts = localStorage.getItem(HEARTS_KEY);
     if (savedPersonalHearts) {
       setPersonalHearts(parseInt(savedPersonalHearts, 10) || 0);
     }
 
-    // Load easter egg clicks from localStorage
-    const savedEasterEggClicks = localStorage.getItem('snippix-easter-egg-clicks');
+    // Load easter egg clicks from localStorage with version
+    const savedEasterEggClicks = localStorage.getItem(EASTER_EGG_KEY);
     if (savedEasterEggClicks) {
       setEasterEggClicks(parseInt(savedEasterEggClicks, 10) || 0);
     }
+
+    // Clean up old localStorage entries from previous versions
+    ['snippix-personal-hearts', 'snippix-easter-egg-clicks', 'snippix-personal-hearts-v1', 'snippix-easter-egg-clicks-v1'].forEach(oldKey => {
+      if (oldKey !== HEARTS_KEY && oldKey !== EASTER_EGG_KEY) {
+        localStorage.removeItem(oldKey);
+      }
+    });
 
     // Load global count from API
     fetchGlobalHearts();
@@ -76,12 +88,12 @@ export default function Home() {
       // Increment personal count locally
       const newPersonalCount = personalHearts + 1;
       setPersonalHearts(newPersonalCount);
-      localStorage.setItem('snippix-personal-hearts', newPersonalCount.toString());
+      localStorage.setItem(HEARTS_KEY, newPersonalCount.toString());
 
       // Easter egg logic - track total clicks
       const newEasterEggClicks = easterEggClicks + 1;
       setEasterEggClicks(newEasterEggClicks);
-      localStorage.setItem('snippix-easter-egg-clicks', newEasterEggClicks.toString());
+      localStorage.setItem(EASTER_EGG_KEY, newEasterEggClicks.toString());
 
       // Show easter egg after 7 clicks
       if (newEasterEggClicks === 7) {
@@ -96,12 +108,12 @@ export default function Home() {
       setHeartCount(prev => prev + 1);
       const newPersonalCount = personalHearts + 1;
       setPersonalHearts(newPersonalCount);
-      localStorage.setItem('snippix-personal-hearts', newPersonalCount.toString());
+      localStorage.setItem(HEARTS_KEY, newPersonalCount.toString());
 
       // Easter egg logic for fallback too
       const newEasterEggClicks = easterEggClicks + 1;
       setEasterEggClicks(newEasterEggClicks);
-      localStorage.setItem('snippix-easter-egg-clicks', newEasterEggClicks.toString());
+      localStorage.setItem(EASTER_EGG_KEY, newEasterEggClicks.toString());
 
       if (newEasterEggClicks === 7) {
         setShowEasterEgg(true);

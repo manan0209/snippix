@@ -42,22 +42,4 @@ export async function POST() {
     );
   }
 }
-// Temporary reset function - remove after use
-export async function PUT() {
-  try {
-    const resetCount = 28;
-    await kv.set(HEARTS_KEY, resetCount);
-    
-    return NextResponse.json({ 
-      count: resetCount,
-      message: `Heart count reset to ${resetCount}! ❤️`
-    });
-  } catch (error) {
-    console.error('Failed to reset heart count:', error);
-    return NextResponse.json(
-      { error: 'Failed to reset hearts' },
-      { status: 500 }
-    );
-  }
-}
-// Note: The PUT method is for temporary use to reset the heart count.
+
