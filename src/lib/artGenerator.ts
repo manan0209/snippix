@@ -36,53 +36,6 @@ export function extractCodeFeatures(code: string): CodeFeatures {
 }
 
 /**
- * Detect programming language patterns for better art selection
- */
-function detectContentType(code: string): string {
-  const patterns = {
-    html: /<[^>]+>/,
-    css: /[{}:;].*{.*}/,
-    json: /^\s*[{\[][\s\S]*[}\]]\s*$/,
-    javascript: /\b(function|const|let|var|=>)\b/,
-    python: /\b(def |import |from |class )\b/,
-    java: /\b(public|private|class|import)\b/,
-    markdown: /^#{1,6}\s|^\*{1,2}[^*]/m,
-    code: /[{}();]/
-  };
-  
-  for (const [type, pattern] of Object.entries(patterns)) {
-    if (pattern.test(code)) {
-      return type;
-    }
-  }
-  
-  return 'text';
-}
-
-/**
- * Calculate Shannon entropy for content complexity analysis
- */
-function calculateEntropy(text: string): number {
-  const freq: Record<string, number> = {};
-  
-  // Count character frequencies
-  for (const char of text) {
-    freq[char] = (freq[char] || 0) + 1;
-  }
-  
-  // Calculate entropy
-  let entropy = 0;
-  const textLength = text.length;
-  
-  for (const count of Object.values(freq)) {
-    const probability = count / textLength;
-    entropy -= probability * Math.log2(probability);
-  }
-  
-  return entropy;
-}
-
-/**
  * Adds a subtle Snippix watermark in the bottom right corner
  */
 function addSnippixWatermark(
@@ -306,60 +259,6 @@ function generateCreatureArt(ctx: CanvasRenderingContext2D, config: ArtConfig, f
 function seededRandom(seed: number): number {
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
-}
-
-/**
- * Enhanced color selection with spatial and semantic context
- */
-function selectEnhancedColor(
-  x: number, 
-  y: number, 
-  distance: number, 
-  features: CodeFeatures, 
-  colors: string[], 
-  hash: number,
-  baseColorIdx: number = 0
-): string {
-  // Add spatial variation
-  const spatialVariation = Math.sin(x * 0.1 + y * 0.1 + hash * 0.01) * 0.3;
-  
-  // Add semantic weight based on content type
-  const semanticWeight = features.symbols > 50 ? 0.4 : 0.1;
-  
-  // Add distance-based gradient
-  const distanceWeight = Math.sin(distance * 0.05) * 0.2;
-  
-  // Combine all factors
-  const colorVariation = spatialVariation + semanticWeight + distanceWeight;
-  const finalColorIdx = Math.floor((baseColorIdx + colorVariation + 1) * (colors.length - 1) / 2);
-  
-  return colors[Math.min(Math.abs(finalColorIdx), colors.length - 1)];
-}
-
-/**
- * Performance optimization: Use ImageData for batch pixel operations
- */
-function drawOptimizedPixel(
-  imageData: ImageData, 
-  x: number, 
-  y: number, 
-  color: string, 
-  width: number
-): void {
-  if (x < 0 || x >= width || y < 0 || y >= imageData.height) return;
-  
-  const index = (y * width + x) * 4;
-  
-  // Convert hex color to RGB
-  const hex = color.replace('#', '');
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  
-  imageData.data[index] = r;     // Red
-  imageData.data[index + 1] = g; // Green
-  imageData.data[index + 2] = b; // Blue
-  imageData.data[index + 3] = 255; // Alpha
 }
 
 function generateLandscapeArt(ctx: CanvasRenderingContext2D, config: ArtConfig, features: CodeFeatures, hash: number, cols: number, rows: number): void {
