@@ -28,6 +28,9 @@ export default function Home() {
   const [personalHearts, setPersonalHearts] = useState(0);
   const [isHeartLoading, setIsHeartLoading] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [easterEggClicks, setEasterEggClicks] = useState(0);
+  const [showEasterEgg, setShowEasterEgg] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Load global heart count and personal count on component mount
@@ -36,6 +39,12 @@ export default function Home() {
     const savedPersonalHearts = localStorage.getItem('snippix-personal-hearts');
     if (savedPersonalHearts) {
       setPersonalHearts(parseInt(savedPersonalHearts, 10) || 0);
+    }
+
+    // Load easter egg clicks from localStorage
+    const savedEasterEggClicks = localStorage.getItem('snippix-easter-egg-clicks');
+    if (savedEasterEggClicks) {
+      setEasterEggClicks(parseInt(savedEasterEggClicks, 10) || 0);
     }
 
     // Load global count from API
@@ -68,6 +77,18 @@ export default function Home() {
       const newPersonalCount = personalHearts + 1;
       setPersonalHearts(newPersonalCount);
       localStorage.setItem('snippix-personal-hearts', newPersonalCount.toString());
+
+      // Easter egg logic - track total clicks
+      const newEasterEggClicks = easterEggClicks + 1;
+      setEasterEggClicks(newEasterEggClicks);
+      localStorage.setItem('snippix-easter-egg-clicks', newEasterEggClicks.toString());
+
+      // Show easter egg after 7 clicks
+      if (newEasterEggClicks === 7) {
+        setShowEasterEgg(true);
+        // Auto-hide after 10 seconds
+        setTimeout(() => setShowEasterEgg(false), 10000);
+      }
       
     } catch {
       console.log('Could not increment hearts');
@@ -76,6 +97,16 @@ export default function Home() {
       const newPersonalCount = personalHearts + 1;
       setPersonalHearts(newPersonalCount);
       localStorage.setItem('snippix-personal-hearts', newPersonalCount.toString());
+
+      // Easter egg logic for fallback too
+      const newEasterEggClicks = easterEggClicks + 1;
+      setEasterEggClicks(newEasterEggClicks);
+      localStorage.setItem('snippix-easter-egg-clicks', newEasterEggClicks.toString());
+
+      if (newEasterEggClicks === 7) {
+        setShowEasterEgg(true);
+        setTimeout(() => setShowEasterEgg(false), 10000);
+      }
     } finally {
       setIsHeartLoading(false);
     }
@@ -177,6 +208,26 @@ export default function Home() {
               <span className="ml-1 font-semibold">Demo</span>
             </button>
           </div>
+          
+          {/* Contact button - appears after easter egg unlocked */}
+          {easterEggClicks >= 7 && (
+            <div className="relative group">
+              <button
+                onClick={() => setShowContactModal(true)}
+                className="flex items-center gap-1 px-3 py-1 bg-[#8b5cf6]/20 border border-[#8b5cf6]/50 rounded-full text-[#8b5cf6] text-xs font-mono hover:bg-[#8b5cf6]/30 hover:border-[#8b5cf6]/70 transition-all shadow group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#8b5cf6] animate-fadeIn"
+                title="Contact me - You unlocked this!"
+                aria-label="Contact me"
+                tabIndex={0}
+                type="button"
+              >
+                <svg className="w-4 h-4 text-[#8b5cf6]" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                </svg>
+                
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-[#8b5cf6] rounded-full animate-pulse"></div>
+              </button>
+            </div>
+          )}
       {/* Video Modal with heading, animation, close on background click, and responsive aspect ratio */}
       {isVideoModalOpen && (
         <div
@@ -214,6 +265,77 @@ export default function Home() {
                 allowFullScreen
                 className="w-full h-full rounded"
               ></iframe>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Contact Modal - unlocked after easter egg */}
+      {showContactModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fadeIn"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowContactModal(false);
+          }}
+          aria-modal="true"
+          role="dialog"
+        >
+          <div
+            className="bg-gradient-to-br from-[#18181b] via-[#8b5cf6]/10 to-[#18181b] border-2 border-[#8b5cf6]/60 rounded-2xl shadow-2xl p-6 w-full max-w-sm relative animate-modalIn"
+            style={{ boxShadow: '0 16px 64px 0 #8b5cf680' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowContactModal(false)}
+              className="absolute top-3 right-3 text-[#8b5cf6] hover:text-[#b5e853] transition-colors"
+              aria-label="Close contact modal"
+              type="button"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="text-center">
+              <div className="text-3xl mb-3">💜</div>
+              <h3 className="text-xl font-bold text-[#8b5cf6] mb-4 font-mono">
+                Let&apos;s Connect!
+              </h3>
+              
+              <div className="space-y-3">
+                <a 
+                  href="tel:+917838077715" 
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-[#8b5cf6] text-white rounded-lg hover:bg-[#7c3aed] transition-colors font-mono text-sm w-full"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                  </svg>
+                   +91 85718 24154
+                </a>
+                
+                <div className="flex gap-2">
+                  <a
+                    href="sms:+918571824154"
+                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-[#8b5cf6]/20 border border-[#8b5cf6]/40 text-[#8b5cf6] rounded-lg hover:bg-[#8b5cf6]/30 transition-colors text-xs font-mono"
+                  >
+                    SMS
+                  </a>
+                  <a
+                    href="https://wa.me/918571824154"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-green-600/20 border border-green-500/40 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors text-xs font-mono"
+                  >
+                     WhatsApp
+                  </a>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 rounded-lg">
+                <p className="text-xs text-[#8b5cf6]/70 leading-relaxed">
+                   Yayy! You unlocked this by showing love to Snippix! Feel free to reach out anytime - I&apos;d love to hear from you!
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -499,6 +621,85 @@ export default function Home() {
           </div>
         </footer>
       </div>
+
+      {/* Easter Egg Modal - Shows after 7 heart clicks */}
+      {showEasterEgg && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fadeIn"
+          onClick={() => setShowEasterEgg(false)}
+          aria-modal="true"
+          role="dialog"
+        >
+          <div
+            className="bg-gradient-to-br from-[#18181b] via-[#8b5cf6]/10 to-[#18181b] border-2 border-[#8b5cf6]/60 rounded-2xl shadow-2xl p-8 w-full max-w-md relative animate-modalIn"
+            style={{ boxShadow: '0 16px 64px 0 #8b5cf680' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Animated hearts background */}
+            <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+              {[...Array(12)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute animate-pulse text-red-400/20"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    fontSize: `${12 + Math.random() * 8}px`,
+                    animationDelay: `${Math.random() * 2}s`,
+                    animationDuration: `${2 + Math.random() * 2}s`
+                  }}
+                >
+                  ❤️
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setShowEasterEgg(false)}
+              className="absolute top-3 right-3 text-[#8b5cf6] hover:text-[#b5e853] transition-colors z-10"
+              aria-label="Close easter egg"
+              type="button"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="text-center relative z-10">
+              <div className="text-6xl mb-4 animate-bounce">🎉</div>
+              <h3 className="text-2xl font-bold text-[#8b5cf6] mb-3 font-mono tracking-wide">
+                WOW! Such Love! 💜
+              </h3>
+              <p className="text-[#b5e853] mb-6 leading-relaxed">
+                You&apos;ve clicked the heart <span className="font-bold text-[#8b5cf6]">{easterEggClicks} times</span>! 
+                Your immense love means the world to me! 🌟
+              </p>
+              
+              <div className="bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 rounded-lg p-4 mb-6">
+                <p className="text-sm text-[#8b5cf6] mb-2 font-mono">
+                  Want to connect? Reach out and we&apos;ll chat:
+                </p>
+                <div className="space-y-2">
+                  <a 
+                    href="tel:+917838077715" 
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-[#8b5cf6] text-white rounded-lg hover:bg-[#7c3aed] transition-colors font-mono text-sm"
+                  >
+                    📞 +91 85718 24154
+                  </a>
+                  <p className="text-xs text-[#8b5cf6]/70">
+                    Feel free to call/text anytime!
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-xs text-[#b5e853]/70 space-y-1">
+                <p>Thanks for being an amazing supporter!</p>
+                <p> Your love keeps Snippix growing!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <DecodeArtModal
         isOpen={isDecodeModalOpen}

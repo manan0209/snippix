@@ -2,7 +2,7 @@ import { kv } from '@vercel/kv';
 import { NextResponse } from 'next/server';
 
 const HEARTS_KEY = 'snippix:global:hearts';
-const DEFAULT_COUNT = 72;
+const DEFAULT_COUNT = 44;
 
 export async function GET() {
   try {
@@ -42,3 +42,4 @@ export async function POST() {
     );
   }
 }
+
