@@ -114,7 +114,7 @@ export default function Home() {
       setEasterEggClicks(newEasterEggClicks);
       localStorage.setItem(EASTER_EGG_KEY, newEasterEggClicks.toString());
 
-      if (newEasterEggClicks === 7) {
+      if (newEasterEggClicks === 3) {
         setShowEasterEgg(true);
         setTimeout(() => setShowEasterEgg(false), 10000);
       }
