@@ -159,8 +159,6 @@ function determineArtType(features: CodeFeatures, hash: number): string {
   if (features.length > 1000) selector += 3; // Long content → cosmic/mandala
   if (features.indent > 2) selector += 4;   // Indented → creature/circuit
   
-  // Content type influences (would need to pass code to use detectContentType)
-  // For now, using symbol patterns as proxy
   const hasCodePatterns = features.symbols > 30 && features.length > 200;
   const hasStructuredContent = features.indent > 3 && features.lines > 15;
   

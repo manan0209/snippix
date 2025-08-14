@@ -9,12 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/mathjs": "^9.4.1",
+    "@types/three": "^0.179.0",
     "@vercel/analytics": "^1.5.0",
     "@vercel/kv": "^3.0.0",
+    "gif.js": "^0.2.0",
+    "mathjs": "^14.6.0",
     "next": "15.3.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-simple-code-editor": "^0.14.1"
+    "react-simple-code-editor": "^0.14.1",
+    "three": "^0.179.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
