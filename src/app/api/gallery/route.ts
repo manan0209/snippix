@@ -12,8 +12,9 @@ export async function GET() {
     // Sort by most recent
     artworks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     return NextResponse.json({ artworks });
-  } catch {
-    return NextResponse.json({ error: 'Failed to fetch gallery' }, { status: 500 });
+  } catch (err) {
+    console.error('Gallery GET error:', err);
+    return NextResponse.json({ error: 'Failed to fetch gallery', details: String(err) }, { status: 500 });
   }
 }
 
