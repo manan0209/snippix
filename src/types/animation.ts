@@ -55,7 +55,7 @@ export interface ArtSubmission {
   hasEmbedding: boolean;
   isEncrypted: boolean;
   hearts: number;
-  createdAt: Date;
+  createdAt: string;
   title?: string;
   description?: string;
   authorId?: string; // Optional anonymous
