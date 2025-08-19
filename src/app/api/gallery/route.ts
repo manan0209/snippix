@@ -44,6 +44,7 @@ export async function POST(req: Request) {
       hearts: 0,
       createdAt: new Date().toISOString(),
     };
+    console.log('Storing artwork:', JSON.stringify(newArt));
     await kv.rpush(GALLERY_KEY, JSON.stringify(newArt));
     return NextResponse.json({ success: true, art: newArt });
   } catch {
