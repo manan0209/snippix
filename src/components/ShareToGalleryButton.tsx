@@ -43,6 +43,7 @@ export default function ShareToGalleryButton({ canvasRef, code, palette }: Share
       });
       if (!res.ok) throw new Error('Failed to share art');
       setShared(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || 'Failed to share');
     } finally {

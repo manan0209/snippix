@@ -8,6 +8,7 @@ import ArtCard from '@/components/ArtCard';
 
 export default function GalleryPage() {
   const [selectedPalette, setSelectedPalette] = useState<Palette>(DEFAULT_PALETTE);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [artworks, setArtworks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +23,8 @@ export default function GalleryPage() {
         if (!res.ok) throw new Error('Failed to fetch gallery');
         const data = await res.json();
         setArtworks(data.artworks || []);
-      } catch (err: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
         setError(err.message || 'Failed to load gallery');
       } finally {
         setLoading(false);

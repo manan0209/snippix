@@ -64,6 +64,7 @@ export interface ArtSubmission {
 
 export interface AppState {
   currentMode: 'art' | 'gallery' | 'math';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   selectedPalette: any; // Use existing Palette type
   userPreferences: UserPreferences;
   recentArt: ArtHistory[];

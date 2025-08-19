@@ -10,7 +10,7 @@ interface ArtCardProps {
   onHeart: (id: string) => void;
 }
 
-export default function ArtCard({ id, artUrl, palette, hearts, title, onHeart }: ArtCardProps) {
+export default function ArtCard({ id, artUrl, hearts, title, onHeart }: ArtCardProps) {
   const [isLiking, setIsLiking] = useState(false);
   const [localHearts, setLocalHearts] = useState(hearts);
 

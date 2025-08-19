@@ -12,7 +12,7 @@ export async function GET() {
     // Sort by most recent
     artworks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     return NextResponse.json({ artworks });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to fetch gallery' }, { status: 500 });
   }
 }
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     };
     await kv.rpush(GALLERY_KEY, JSON.stringify(newArt));
     return NextResponse.json({ success: true, art: newArt });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to add artwork' }, { status: 500 });
   }
 }

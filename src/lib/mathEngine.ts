@@ -1,6 +1,6 @@
 // Math engine for equation visualization and animation in Snippix v2.1
 
-import { evaluate, parse, type EvalFunction } from 'mathjs';
+import { evaluate, parse } from 'mathjs';
 import type { MathFunction } from '@/types/animation';
 
 export interface MathPoint {
@@ -58,14 +58,14 @@ export class MathEngine {
   // Generate points for a given equation
   generatePoints(mathFunc: MathFunction, animate: boolean = false, time: number = 0): MathGraphData {
     const points: MathPoint[] = [];
-    let minX = mathFunc.range.min;
-    let maxX = mathFunc.range.max;
-    let minY = Infinity;
-    let maxY = -Infinity;
+  const minX = mathFunc.range.min;
+  const maxX = mathFunc.range.max;
+  let minY = Infinity;
+  let maxY = -Infinity;
 
     try {
       // Prepare the equation for evaluation
-      let equation = mathFunc.equation
+  const equation = mathFunc.equation
         .replace(/\^/g, '**')
         .replace(/π/g, 'pi')
         .replace(/∞/g, 'Infinity');
@@ -208,13 +208,13 @@ export class MathEngine {
     this.ctx.stroke();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private drawGrid(bounds: any, width: number, height: number) {
     this.ctx.strokeStyle = '#282828';
     this.ctx.lineWidth = 1;
     this.ctx.setLineDash([2, 4]);
 
     // Vertical grid lines
-    const xStep = (bounds.maxX - bounds.minX) / 10;
     for (let i = 0; i <= 10; i++) {
       const x = (i / 10) * width;
       this.ctx.beginPath();
@@ -224,7 +224,6 @@ export class MathEngine {
     }
 
     // Horizontal grid lines
-    const yStep = (bounds.maxY - bounds.minY) / 10;
     for (let i = 0; i <= 10; i++) {
       const y = (i / 10) * height;
       this.ctx.beginPath();
@@ -236,6 +235,7 @@ export class MathEngine {
     this.ctx.setLineDash([]);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private drawAxes(bounds: any, width: number, height: number) {
     this.ctx.strokeStyle = this.palette[3] || '#4ecdc4';
     this.ctx.lineWidth = 2;

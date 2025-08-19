@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { AnimationEngine, getAnimationStyleById, isWebGLAvailable } from '@/lib/animationEngine';
+import { AnimationEngine, isWebGLAvailable } from '@/lib/animationEngine';
 import { ANIMATION_STYLES, type AnimationStyle, type ExportOptions, type Animation3DConfig } from '@/types/animation';
 
 interface ArtAnimation3DProps {
@@ -23,7 +23,7 @@ export default function ArtAnimation3D({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [webglSupported, setWebglSupported] = useState(true);
-  const [exportProgress, setExportProgress] = useState(0);
+  // Removed unused variable 'exportProgress'
 
   // Check WebGL support on mount
   useEffect(() => {
@@ -91,7 +91,7 @@ export default function ArtAnimation3D({
     if (!engineRef.current || isExporting) return;
 
     setIsExporting(true);
-    setExportProgress(0);
+  // setExportProgress(0); // Removed since the variable was removed
 
     const exportOptions: ExportOptions = {
       format: 'gif',
@@ -119,7 +119,7 @@ export default function ArtAnimation3D({
       console.error('Failed to export animation:', error);
     } finally {
       setIsExporting(false);
-      setExportProgress(0);
+  // setExportProgress(0); // Removed since the variable was removed
     }
   }, [isExporting, onExportComplete]);
 
@@ -132,7 +132,7 @@ export default function ArtAnimation3D({
           </svg>
           <h3 className="text-lg font-bold mb-2">WebGL Not Supported</h3>
           <p className="text-sm opacity-70">
-            Your browser doesn't support WebGL, which is required for 3D animations.
+            Your browser doesn&apos;t support WebGL, which is required for 3D animations.
             <br />
             Try using a modern browser like Chrome, Firefox, or Safari.
           </p>
@@ -262,7 +262,7 @@ export default function ArtAnimation3D({
       <div className="mt-4 pt-4 border-t border-[#282828]/50">
         <div className="text-xs text-[#b5e853]/70 font-mono space-y-1">
           <div>Style: {selectedStyle.name}</div>
-          <div>Resolution: 600×400</div>
+          <div>Resolution: 600&times;400</div>
           <div>Format: GIF (3 seconds, 30fps)</div>
         </div>
       </div>

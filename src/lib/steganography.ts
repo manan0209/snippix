@@ -54,7 +54,7 @@ function stringToBinary(str: string): string {
  * Convert binary representation back to string with UTF-8 decoding
  */
 function binaryToString(binary: string): string {
-  const bytes = [];
+  const bytes: number[] = [];
   for (let i = 0; i < binary.length; i += 8) {
     const byte = binary.substring(i, i + 8);
     if (byte.length === 8) {

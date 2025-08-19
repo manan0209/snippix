@@ -112,15 +112,15 @@ export class AnimationEngine {
 
   // Animation styles
   private animateExtrusion(time: number) {
-    this.pixelMeshes.forEach((mesh, index) => {
-      const wave = Math.sin(time * 0.002 + index * 0.1) * 0.5 + 0.5;
+    this.pixelMeshes.forEach((mesh) => {
+      const wave = Math.sin(time * 0.002) * 0.5 + 0.5;
       mesh.scale.setZ(1 + wave * 2);
       mesh.position.z = wave * 5;
     });
   }
 
   private animateWave(time: number) {
-    this.pixelMeshes.forEach((mesh, index) => {
+    this.pixelMeshes.forEach((mesh) => {
       const original = mesh.userData.originalPosition;
       const wave = Math.sin(time * 0.003 + original.x * 0.2 + original.y * 0.1) * 3;
       mesh.position.z = wave;
@@ -129,9 +129,9 @@ export class AnimationEngine {
   }
 
   private animateRotation(time: number) {
-    this.pixelMeshes.forEach((mesh, index) => {
+    this.pixelMeshes.forEach((mesh) => {
       const original = mesh.userData.originalPosition;
-      mesh.rotation.x = time * 0.001 + index * 0.1;
+      mesh.rotation.x = time * 0.001;
       mesh.rotation.y = time * 0.0015 + original.x * 0.05;
       mesh.rotation.z = Math.sin(time * 0.002) * 0.3;
     });
@@ -144,18 +144,18 @@ export class AnimationEngine {
   }
 
   private animateParticles(time: number) {
-    this.pixelMeshes.forEach((mesh, index) => {
+    this.pixelMeshes.forEach((mesh) => {
       const original = mesh.userData.originalPosition;
-      const floatAmount = Math.sin(time * 0.002 + index * 0.3) * 10;
-      const driftX = Math.cos(time * 0.001 + index * 0.2) * 2;
-      const driftY = Math.sin(time * 0.0015 + index * 0.25) * 2;
+      const floatAmount = Math.sin(time * 0.002) * 10;
+      const driftX = Math.cos(time * 0.001) * 2;
+      const driftY = Math.sin(time * 0.0015) * 2;
       
       mesh.position.x = original.x + driftX;
       mesh.position.y = original.y + driftY;
       mesh.position.z = floatAmount;
       
-      mesh.rotation.x = time * 0.003 + index * 0.1;
-      mesh.rotation.y = time * 0.002 + index * 0.15;
+      mesh.rotation.x = time * 0.003;
+      mesh.rotation.y = time * 0.002;
     });
   }
 
@@ -203,7 +203,7 @@ export class AnimationEngine {
 
   // Export animation as GIF
   async exportAsGif(options: ExportOptions): Promise<Blob> {
-    return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
       const gif = new GIF({
         workers: 2,
         quality: options.quality === 'high' ? 5 : options.quality === 'medium' ? 10 : 20,

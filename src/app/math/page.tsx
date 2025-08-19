@@ -125,7 +125,7 @@ export default function MathPage() {
                   Animation
                 </h3>
                 <p className="text-[#b5e853]/70 text-sm">
-                  Use the "time" variable to create time-based animations and export as PNG.
+                  Use the &quot;time&quot; variable to create time-based animations and export as PNG.
                 </p>
               </div>
             </div>

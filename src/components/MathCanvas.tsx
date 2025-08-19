@@ -233,6 +233,7 @@ export default function MathCanvas({ palette, width = 600, height = 400 }: MathC
       <div className="bg-[#1a1a1a] border border-[#282828]/50 rounded-lg p-4">
         <h3 className="text-[#b5e853] text-sm font-mono font-medium mb-3">🧮 Preset Equations</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {(PRESET_EQUATIONS as any)[selectedType]?.map((preset: any, index: number) => (
             <button
               key={index}
