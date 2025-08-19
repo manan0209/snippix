@@ -8,7 +8,20 @@ const GALLERY_KEY = 'snippix:gallery:artworks';
 export async function GET() {
   try {
     // Fetch all art submissions (stored as a list)
-    const artworks: ArtSubmission[] = (await kv.lrange(GALLERY_KEY, 0, -1))?.map((a: string) => JSON.parse(a)) || [];
+    const rawItems = await kv.lrange(GALLERY_KEY, 0, -1);
+    const artworks: ArtSubmission[] = [];
+    (rawItems || []).forEach((a, idx) => {
+      if (typeof a === 'string') {
+        try {
+          const art = JSON.parse(a);
+          artworks.push(art);
+        } catch (err) {
+          console.warn('Skipping malformed gallery entry at index', idx, err);
+        }
+      } else {
+        console.warn('Skipping non-string gallery entry at index', idx, a);
+      }
+    });
     // Sort by most recent
     artworks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     return NextResponse.json({ artworks });
