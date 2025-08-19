@@ -19,13 +19,15 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-simple-code-editor": "^0.14.1",
-    "three": "^0.179.1"
+    "three": "^0.179.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.20",
     "eslint": "^9",
     "eslint-config-next": "15.3.4",

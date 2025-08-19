@@ -5,6 +5,7 @@ import ArtAnimation3D from "@/components/ArtAnimation3D";
 import CodeInput from "@/components/CodeInput";
 import DecodeArtModal from "@/components/DecodeArtModal";
 import DownloadButton from "@/components/DownloadButton";
+import ShareToGalleryButton from "@/components/ShareToGalleryButton";
 import { type ArtConfig } from "@/lib/artGenerator";
 import { DEFAULT_PALETTE, type Palette, PALETTES } from "@/lib/palettes";
 import { useEffect, useRef, useState } from "react";
@@ -193,12 +194,26 @@ export default function Home() {
               </svg>
               <span className="ml-1 font-semibold">Math</span>
             </Link>
-            {/* NEW tag */}
-            <div className="absolute -top-2 -right-1 pointer-events-none">
-              <span className="text-xs font-mono text-[#18181b] bg-[#8b5cf6] px-2 py-1 rounded border border-[#8b5cf6] shadow-lg mb-0.5 animate-pulse drop-shadow-lg" style={{filter:'brightness(1.2)'}}>NEW</span>
-            </div>
           </div>
-        </div>        {/* Global Heart Counter */}
+          {/* Gallery button */}
+              <div className="relative group">
+                <Link
+                  href="/gallery"
+                  className="flex items-center gap-1 px-3 py-2 bg-[#18181b]/80 backdrop-blur-sm border border-[#8b5cf6]/20 rounded-lg text-[#8b5cf6] text-xs font-mono hover:border-[#8b5cf6]/40 hover:bg-[#8b5cf6]/5 transition-all group"
+                  title="Community Art Gallery"
+                  aria-label="Community Art Gallery"
+                >
+                  <svg className="w-4 h-4 text-[#b5e853]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span className="ml-1 font-semibold">Code Art Gallery</span>
+                </Link>
+                
+              </div>
+        </div>      
+         
+        
+          {/* Global Heart Counter */}
         <div className="fixed top-4 right-4 z-50 flex flex-col items-end gap-2">
           <button
             onClick={handleHeartClick}
@@ -344,28 +359,8 @@ export default function Home() {
                   </svg>
                 </span>
               </button>
-              <span className="px-4 py-2 bg-[#b5e853]/10 border border-[#b5e853]/30 rounded-full text-[#b5e853] text-sm font-mono">
-                Code Art
-              </span>
 
-              {/* Gallery button */}
-              <div className="relative group">
-                <Link
-                  href="/gallery"
-                  className="flex items-center gap-1 px-3 py-2 bg-[#18181b]/80 backdrop-blur-sm border border-[#b5e853]/20 rounded-lg text-[#b5e853] text-xs font-mono hover:border-[#b5e853]/40 hover:bg-[#b5e853]/5 transition-all group"
-                  title="Community Art Gallery"
-                  aria-label="Community Art Gallery"
-                >
-                  <svg className="w-4 h-4 text-[#b5e853]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span className="ml-1 font-semibold">Gallery</span>
-                </Link>
-                {/* NEW tag */}
-                <div className="absolute -top-2 -right-1 pointer-events-none">
-                  <span className="text-xs font-mono text-[#18181b] bg-[#b5e853] px-2 py-1 rounded border border-[#b5e853] shadow-lg mb-0.5 animate-pulse drop-shadow-lg" style={{filter:'brightness(1.2)'}}>NEW</span>
-                </div>
-              </div>
+             
               <button
                 onClick={() => setEnableEmbedding(!enableEmbedding)}
                 className={`px-4 py-2 border-2 rounded-full text-sm font-mono transition-all shadow-lg ${
@@ -605,6 +600,11 @@ export default function Home() {
                       <DownloadButton 
                         canvasRef={canvasRef}
                         filename="snippixbymnn.png"
+                      />
+                      <ShareToGalleryButton 
+                        canvasRef={canvasRef}
+                        code={submitted.code}
+                        palette={submitted.palette}
                       />
                     </div>
                   </div>

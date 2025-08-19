@@ -1,11 +1,43 @@
 "use client";
 
-import { useState } from 'react';
+
+import { useState, useEffect, useCallback } from 'react';
 import { DEFAULT_PALETTE, type Palette, PALETTES } from '@/lib/palettes';
 import Link from 'next/link';
+import ArtCard from '@/components/ArtCard';
 
 export default function GalleryPage() {
   const [selectedPalette, setSelectedPalette] = useState<Palette>(DEFAULT_PALETTE);
+  const [artworks, setArtworks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch gallery art from Vercel KV API
+  useEffect(() => {
+    async function fetchArt() {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch('/api/gallery');
+        if (!res.ok) throw new Error('Failed to fetch gallery');
+        const data = await res.json();
+        setArtworks(data.artworks || []);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load gallery');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchArt();
+  }, []);
+
+  // Heart handler for each art
+  const handleHeart = useCallback(async (id: string) => {
+    try {
+      await fetch(`/api/gallery/${id}/heart`, { method: 'POST' });
+      setArtworks((prev) => prev.map((art) => art.id === id ? { ...art, hearts: art.hearts + 1 } : art));
+    } catch {}
+  }, []);
 
   const handlePaletteChange = () => {
     const currentIndex = PALETTES.findIndex(p => p.name === selectedPalette.name);
@@ -17,7 +49,7 @@ export default function GalleryPage() {
     <div className="min-h-screen w-full bg-gradient-to-br from-[#18181b] via-[#1a1a1a] to-[#18181b] font-mono">
       {/* Background Grid */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.03]">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYjVlODUzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')]"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDQwIDAgTCAwIDAgMCA0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYjVlODUzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')]" />
       </div>
 
       <div className="relative z-10 flex flex-col min-h-screen">
@@ -85,13 +117,13 @@ export default function GalleryPage() {
 
             <div className="flex flex-wrap justify-center gap-4 mt-8">
               <span className="px-4 py-2 bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 rounded-full text-[#8b5cf6] text-sm font-mono">
-                🎨 Community Art
+                Community Art
               </span>
               <span className="px-4 py-2 bg-[#b5e853]/10 border border-[#b5e853]/30 rounded-full text-[#b5e853] text-sm font-mono">
-                ❤️ Favorites
+                Favorites
               </span>
               <span className="px-4 py-2 bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 rounded-full text-[#8b5cf6] text-sm font-mono">
-                🔗 Sharing
+                Sharing
               </span>
             </div>
           </div>
@@ -100,80 +132,27 @@ export default function GalleryPage() {
         {/* Main Content */}
         <main className="flex-1 flex flex-col items-center px-4 pb-12">
           <div className="w-full max-w-6xl">
-            {/* Coming Soon Section */}
-            <section className="bg-[#1a1a1a] border border-[#282828] rounded-xl p-12 shadow-2xl text-center">
-              <div className="max-w-2xl mx-auto">
-                <div className="text-6xl mb-6">
-                  🚧
-                </div>
-                <h2 className="text-3xl font-bold text-[#b5e853] mb-6 tracking-widest uppercase">
-                  Gallery Coming Soon
-                </h2>
-                <p className="text-lg text-[#b5e853]/80 leading-relaxed mb-8">
-                  We&apos;re building an amazing community gallery where you can:
-                </p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  <div className="bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 rounded-lg p-6">
-                    <div className="text-3xl mb-3">🎨</div>
-                    <h3 className="text-[#8b5cf6] font-bold mb-2">Share Your Art</h3>
-                    <p className="text-[#8b5cf6]/70 text-sm">
-                      Upload and showcase your pixel art creations to the community
-                    </p>
-                  </div>
-
-                  <div className="bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 rounded-lg p-6">
-                    <div className="text-3xl mb-3">❤️</div>
-                    <h3 className="text-[#8b5cf6] font-bold mb-2">Like & Heart</h3>
-                    <p className="text-[#8b5cf6]/70 text-sm">
-                      Show appreciation for amazing artwork with hearts and reactions
-                    </p>
-                  </div>
-
-                  <div className="bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 rounded-lg p-6">
-                    <div className="text-3xl mb-3">💬</div>
-                    <h3 className="text-[#8b5cf6] font-bold mb-2">Social Sharing</h3>
-                    <p className="text-[#8b5cf6]/70 text-sm">
-                      Share artwork to Twitter, Discord, and other platforms
-                    </p>
-                  </div>
-
-                  <div className="bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 rounded-lg p-6">
-                    <div className="text-3xl mb-3">🔍</div>
-                    <h3 className="text-[#8b5cf6] font-bold mb-2">Discover & Browse</h3>
-                    <p className="text-[#8b5cf6]/70 text-sm">
-                      Explore artwork by palette, style, and community favorites
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-[#b5e853]/10 border border-[#b5e853]/30 rounded-lg p-6 mb-8">
-                  <h3 className="text-[#b5e853] font-bold mb-3 flex items-center justify-center gap-2">
-                    <span className="text-xl">🚀</span>
-                    In Development
-                  </h3>
-                  <p className="text-[#b5e853]/80 text-sm mb-4">
-                    The gallery is currently being built with these amazing features:
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-2 text-xs">
-                    <span className="px-3 py-1 bg-[#b5e853]/20 rounded-full text-[#b5e853]">Vercel KV Storage</span>
-                    <span className="px-3 py-1 bg-[#b5e853]/20 rounded-full text-[#b5e853]">Community Moderation</span>
-                    <span className="px-3 py-1 bg-[#b5e853]/20 rounded-full text-[#b5e853]">Advanced Filtering</span>
-                    <span className="px-3 py-1 bg-[#b5e853]/20 rounded-full text-[#b5e853]">Mobile Responsive</span>
-                  </div>
-                </div>
-
-                <Link
-                  href="/"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#8b5cf6] text-white rounded-lg font-mono hover:bg-[#7c3aed] transition-all shadow-lg hover:shadow-[#8b5cf6]/30 group"
-                >
-                  <span>Create Art Now</span>
-                  <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </Link>
+            {loading ? (
+              <div className="text-center py-24 text-[#b5e853] text-xl font-mono animate-pulse">Loading gallery...</div>
+            ) : error ? (
+              <div className="text-center py-24 text-red-400 text-lg font-mono">{error}</div>
+            ) : artworks.length === 0 ? (
+              <div className="text-center py-24 text-[#b5e853]/80 text-lg font-mono">No art has been shared yet. Be the first to create and share!</div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                {artworks.map((art) => (
+                  <ArtCard
+                    key={art.id}
+                    id={art.id}
+                    artUrl={art.artUrl}
+                    palette={art.palette}
+                    hearts={art.hearts}
+                    title={art.title}
+                    onHeart={handleHeart}
+                  />
+                ))}
               </div>
-            </section>
+            )}
           </div>
         </main>
 
@@ -191,13 +170,6 @@ export default function GalleryPage() {
                 GitHub
               </a>
             </div>
-            
-            <div className="mb-4 text-xs text-[#b5e853]/70 space-y-1">
-              <p>
-                <span className="px-2 py-1 bg-[#8b5cf6]/10 rounded text-[#8b5cf6]">Gallery</span> coming soon
-              </p>
-            </div>
-            
             <p className="text-[#b5e853] text-sm opacity-60">
               Made with <span className="text-red-400">love</span> for Hack Club Summer of Code · 2025
             </p>

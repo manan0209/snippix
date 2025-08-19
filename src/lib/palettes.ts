@@ -11,7 +11,7 @@ export const PALETTES: Palette[] = [
   { name: 'Cyber', colors: ['#f72585', '#b5179e', '#7209b7', '#3a0ca3', '#4361ee', '#4cc9f0'] },
 ];
 
-export const DEFAULT_PALETTE = PALETTES[3];
+export const DEFAULT_PALETTE = PALETTES[4];
 
 export function getPaletteByIndex(index: number): Palette {
   return PALETTES[index] || DEFAULT_PALETTE;
