@@ -128,7 +128,7 @@ export default function MathCanvas({ palette, width = 600, height = 400 }: MathC
       {/* Equation Input */}
       <div className="bg-[#1a1a1a] border border-[#282828] rounded-lg p-4">
         <label className="block text-[#b5e853] text-sm font-mono mb-2 font-medium">
-          📊 Mathematical Expression
+          Mathematical Expression
         </label>
         <div className="space-y-3">
           <input
@@ -153,7 +153,7 @@ export default function MathCanvas({ palette, width = 600, height = 400 }: MathC
           )}
 
           <div className="text-xs text-[#b5e853]/60 font-mono">
-            💡 Use: sin, cos, tan, x, t (for parametric), θ or theta (for polar), time (for animation)
+            Use: sin, cos, tan, x, t (for parametric), θ or theta (for polar), time (for animation)
           </div>
         </div>
       </div>
@@ -183,14 +183,14 @@ export default function MathCanvas({ palette, width = 600, height = 400 }: MathC
             }`}
             disabled={!isValid}
           >
-            {isAnimated ? '⏸️ Pause' : '▶️ Animate'}
+            {isAnimated ? 'Pause' : 'Animate'}
           </button>
 
           <button
             onClick={handleRandomEquation}
             className="px-3 py-2 bg-[#b5e853]/10 border border-[#b5e853]/40 rounded-lg text-[#b5e853] text-sm font-mono hover:bg-[#b5e853]/20 transition-all"
           >
-            🎲 Random
+            Random
           </button>
         </div>
 
@@ -199,7 +199,7 @@ export default function MathCanvas({ palette, width = 600, height = 400 }: MathC
           disabled={!isValid}
           className="px-3 py-2 bg-[#8b5cf6]/10 border border-[#8b5cf6]/40 rounded-lg text-[#8b5cf6] text-sm font-mono hover:bg-[#8b5cf6]/20 transition-all disabled:opacity-50"
         >
-          💾 Export PNG
+          Export PNG
         </button>
       </div>
 
