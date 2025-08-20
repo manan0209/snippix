@@ -11,9 +11,13 @@ export async function GET() {
     const rawItems = await kv.lrange(GALLERY_KEY, 0, -1);
     const artworks: ArtSubmission[] = [];
     (rawItems || []).forEach((a, idx) => {
-      if (typeof a === 'string') {
+      let entry = a;
+      if (typeof a === 'object' && a !== null) {
+        entry = JSON.stringify(a);
+      }
+      if (typeof entry === 'string') {
         try {
-          const art = JSON.parse(a);
+          const art = JSON.parse(entry);
           artworks.push(art);
         } catch (err) {
           console.warn('Skipping malformed gallery entry at index', idx, err);

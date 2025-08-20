@@ -9,10 +9,14 @@ export async function POST(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   context: any
 ) {
-  const id = context.params?.id;
+  const { id } = await context.params;
   try {
-    // Fetch all artworks
-    const artworks: ArtSubmission[] = (await kv.lrange(GALLERY_KEY, 0, -1))?.map((a: string) => JSON.parse(a)) || [];
+    // Fetch all artworks, handle both string and object entries
+    const artworks: ArtSubmission[] = (await kv.lrange(GALLERY_KEY, 0, -1))?.map((a) => {
+      if (typeof a === 'string') return JSON.parse(a);
+      if (typeof a === 'object' && a !== null) return a;
+      return null;
+    }).filter(Boolean) || [];
     const idx = artworks.findIndex((a) => a.id === id);
     if (idx === -1) {
       return NextResponse.json({ error: 'Artwork not found' }, { status: 404 });
