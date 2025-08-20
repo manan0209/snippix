@@ -20,6 +20,8 @@ export interface PixelData {
   y: number;
   color: string;
   size: number;
+  artType?: string; // e.g. 'cat', 'dog', etc.
+  role?: string;    // e.g. 'body', 'tail', 'ear', 'eye', etc.
 }
 
 export interface AnimationFrame {

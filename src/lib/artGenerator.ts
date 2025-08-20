@@ -113,8 +113,14 @@ export function generatePixelArt(
 
   // Determine what type of pixel art to generate based on code characteristics
   const artType = determineArtType(features, hash);
-  
+
   switch (artType) {
+    case 'cat':
+      generateCatArt(ctx, config, features, hash, cols, rows);
+      break;
+    case 'dog':
+      generateDogArt(ctx, config, features, hash, cols, rows);
+      break;
     case 'creature':
       generateCreatureArt(ctx, config, features, hash, cols, rows);
       break;
@@ -148,31 +154,186 @@ export function generatePixelArt(
 }
 
 function determineArtType(features: CodeFeatures, hash: number): string {
-  const types = ['creature', 'landscape', 'geometric', 'cosmic', 'abstract', 'circuit', 'mandala'];
-  
-  // Enhanced logic with more sophisticated art type selection
+  const types = ['cat', 'dog', 'creature', 'landscape', 'geometric', 'cosmic', 'abstract', 'circuit', 'mandala'];
+
   let selector = hash;
-  
-  // Code-specific patterns
-  if (features.symbols > 50) selector += 1; // Symbol-heavy → geometric/circuit
-  if (features.lines > 20) selector += 2;   // Multi-line → landscape/abstract
-  if (features.length > 1000) selector += 3; // Long content → cosmic/mandala
-  if (features.indent > 2) selector += 4;   // Indented → creature/circuit
-  
+
+  // Add some fun logic for cats and dogs
+  if (features.length % 7 === 0) selector += 1; // Cat bias
+  if (features.length % 11 === 0) selector += 2; // Dog bias
+  if (features.symbols > 50) selector += 3;
+  if (features.lines > 20) selector += 4;
+  if (features.length > 1000) selector += 5;
+  if (features.indent > 2) selector += 6;
+
   const hasCodePatterns = features.symbols > 30 && features.length > 200;
   const hasStructuredContent = features.indent > 3 && features.lines > 15;
-  
-  // Bias toward circuit art for code-like content
-  if (hasCodePatterns) {
-    selector += 10; // Increase chance of getting 'circuit'
-  }
-  
-  // Bias toward mandala for structured/repetitive content  
-  if (hasStructuredContent) {
-    selector += 15; // Increase chance of getting 'mandala'
-  }
-  
+
+  if (hasCodePatterns) selector += 10;
+  if (hasStructuredContent) selector += 15;
+
   return types[selector % types.length];
+}
+
+function generateCatArt(ctx: CanvasRenderingContext2D, config: ArtConfig, features: CodeFeatures, hash: number, cols: number, rows: number): void {
+  const { pixelSize, colors } = config;
+  // Cat pose/variation based on hash
+  const pose = hash % 4;
+  const centerX = Math.floor(cols / 2);
+  const centerY = Math.floor(rows / 2);
+  const size = Math.min(cols, rows) * 0.35 + (hash % 5);
+
+  // Body
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const dx = x - centerX;
+      const dy = y - centerY;
+      let shouldDraw = false;
+      let colorIdx = 0;
+
+      // Cat body (oval)
+      const bodyShape = (dx * dx) / (size * size) + (dy * dy) / ((size * 0.7) * (size * 0.7));
+      if (bodyShape < 0.9) {
+        shouldDraw = true;
+        colorIdx = 0;
+      }
+
+      // Head (circle above body)
+      const headDx = dx;
+      const headDy = dy + size * 0.7;
+      if ((headDx * headDx + headDy * headDy) < (size * 0.45) * (size * 0.45)) {
+        shouldDraw = true;
+        colorIdx = 1;
+      }
+
+      // Ears (triangles)
+      if (pose === 0 || pose === 2) {
+        if (dy + size * 0.7 < -size * 0.2 && Math.abs(dx) < size * 0.25 && Math.abs(dy + size * 0.7 + size * 0.2) < size * 0.15) {
+          shouldDraw = true;
+          colorIdx = 2;
+        }
+      } else {
+        if (dy + size * 0.7 < -size * 0.1 && Math.abs(dx) < size * 0.35 && Math.abs(dy + size * 0.7 + size * 0.1) < size * 0.18) {
+          shouldDraw = true;
+          colorIdx = 2;
+        }
+      }
+
+      // Tail (curve)
+      if (pose === 1 || pose === 3) {
+        const tailX = dx - size * 0.7;
+        const tailY = dy + size * 0.2;
+        if (Math.abs(tailX) < size * 0.1 && Math.abs(tailY) < size * 0.5 && Math.sin(tailY * 0.2 + hash * 0.01) > 0.2) {
+          shouldDraw = true;
+          colorIdx = 3;
+        }
+      }
+
+      // Eyes
+      if ((headDx * headDx + (headDy + size * 0.1) * (headDy + size * 0.1)) < (size * 0.08) * (size * 0.08)) {
+        shouldDraw = true;
+        colorIdx = 4;
+      }
+      if ((headDx * headDx + (headDy - size * 0.1) * (headDy - size * 0.1)) < (size * 0.08) * (size * 0.08)) {
+        shouldDraw = true;
+        colorIdx = 4;
+      }
+
+      // Whiskers (lines)
+      if (pose % 2 === 0 && Math.abs(headDy) < size * 0.2 && Math.abs(headDx) > size * 0.15 && Math.abs(headDx) < size * 0.35) {
+        shouldDraw = true;
+        colorIdx = 2;
+      }
+
+      if (shouldDraw) {
+        ctx.fillStyle = colors[colorIdx % colors.length];
+        ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+      }
+    }
+  }
+}
+
+function generateDogArt(ctx: CanvasRenderingContext2D, config: ArtConfig, features: CodeFeatures, hash: number, cols: number, rows: number): void {
+  const { pixelSize, colors } = config;
+  // Dog pose/variation based on hash
+  const pose = hash % 4;
+  const centerX = Math.floor(cols / 2);
+  const centerY = Math.floor(rows / 2);
+  const size = Math.min(cols, rows) * 0.38 + (hash % 7);
+
+  for (let y = 0; y < rows; y++) {
+    for (let x = 0; x < cols; x++) {
+      const dx = x - centerX;
+      const dy = y - centerY;
+      let shouldDraw = false;
+      let colorIdx = 0;
+
+      // Body (oval)
+      const bodyShape = (dx * dx) / (size * size) + (dy * dy) / ((size * 0.6) * (size * 0.6));
+      if (bodyShape < 0.9) {
+        shouldDraw = true;
+        colorIdx = 0;
+      }
+
+      // Head (circle above body)
+      const headDx = dx;
+      const headDy = dy + size * 0.7;
+      if ((headDx * headDx + headDy * headDy) < (size * 0.5) * (size * 0.5)) {
+        shouldDraw = true;
+        colorIdx = 1;
+      }
+
+      // Ears (floppy or pointy)
+      if (pose === 0 || pose === 2) {
+        if (dy + size * 0.7 < -size * 0.15 && Math.abs(dx) < size * 0.3 && Math.abs(dy + size * 0.7 + size * 0.15) < size * 0.18) {
+          shouldDraw = true;
+          colorIdx = 2;
+        }
+      } else {
+        if (dy + size * 0.7 < -size * 0.05 && Math.abs(dx) < size * 0.4 && Math.abs(dy + size * 0.7 + size * 0.05) < size * 0.22) {
+          shouldDraw = true;
+          colorIdx = 2;
+        }
+      }
+
+      // Tail (wagging)
+      if (pose === 1 || pose === 3) {
+        const tailX = dx + size * 0.8;
+        const tailY = dy + size * 0.3;
+        if (Math.abs(tailX) < size * 0.12 && Math.abs(tailY) < size * 0.5 && Math.sin(tailY * 0.2 + hash * 0.02) > 0.1) {
+          shouldDraw = true;
+          colorIdx = 3;
+        }
+      }
+
+      // Eyes
+      if ((headDx * headDx + (headDy + size * 0.12) * (headDy + size * 0.12)) < (size * 0.09) * (size * 0.09)) {
+        shouldDraw = true;
+        colorIdx = 4;
+      }
+      if ((headDx * headDx + (headDy - size * 0.12) * (headDy - size * 0.12)) < (size * 0.09) * (size * 0.09)) {
+        shouldDraw = true;
+        colorIdx = 4;
+      }
+
+      // Nose (small dot)
+      if ((headDx * headDx + (headDy + size * 0.22) * (headDy + size * 0.22)) < (size * 0.05) * (size * 0.05)) {
+        shouldDraw = true;
+        colorIdx = 2;
+      }
+
+      // Mouth (line)
+      if (pose % 2 === 0 && Math.abs(headDy) < size * 0.18 && Math.abs(headDx) < size * 0.18) {
+        shouldDraw = true;
+        colorIdx = 2;
+      }
+
+      if (shouldDraw) {
+        ctx.fillStyle = colors[colorIdx % colors.length];
+        ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+      }
+    }
+  }
 }
 
 function generateCreatureArt(ctx: CanvasRenderingContext2D, config: ArtConfig, features: CodeFeatures, hash: number, cols: number, rows: number): void {
@@ -708,3 +869,4 @@ export function downloadCanvas(canvas: HTMLCanvasElement, filename: string = 'sn
   link.href = canvas.toDataURL('image/png');
   link.click();
 }
+

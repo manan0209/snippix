@@ -1,7 +1,3 @@
-/**
- * Simple and Fun Pixel Art Steganography for Snippix
- * Embeds code/messages directly into pixel data using LSB encoding
- */
 
 export interface EmbedOptions {
   useEncryption?: boolean;
