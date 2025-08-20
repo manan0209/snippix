@@ -126,7 +126,7 @@ export class AnimationEngine {
   // --- Fun, art-type-aware animations ---
   private animateCat(time: number) {
     this.pixelMeshes.forEach((mesh, i) => {
-      const { originalPosition, role } = mesh.userData;
+      const { role } = mesh.userData;
       // Cat tail: wag
       if (role === 'tail') {
         mesh.position.z = Math.sin(time * 0.005 + i * 0.2) * 6;
@@ -151,7 +151,7 @@ export class AnimationEngine {
 
   private animateDog(time: number) {
     this.pixelMeshes.forEach((mesh, i) => {
-      const { originalPosition, role } = mesh.userData;
+      const { role } = mesh.userData;
       // Dog tail: wag
       if (role === 'tail') {
         mesh.position.z = Math.sin(time * 0.006 + i * 0.2) * 7;
@@ -176,7 +176,6 @@ export class AnimationEngine {
 
   private animateAbstract(time: number) {
     this.pixelMeshes.forEach((mesh, i) => {
-      const { originalPosition } = mesh.userData;
       mesh.position.z = Math.sin(time * 0.004 + i * 0.2) * 5;
       mesh.rotation.x = Math.sin(time * 0.003 + i * 0.1) * 0.5;
       mesh.rotation.y = Math.cos(time * 0.002 + i * 0.1) * 0.5;
